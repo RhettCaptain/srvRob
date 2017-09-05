@@ -1,11 +1,46 @@
 #include "Joystick.h"
 
-using namespace std;
-
 Joystick::Joystick(){
 	sub = nHandle.subscribe("joy",10,&Joystick::updateState,this);
+	pub = nHandle.advertise<geometry_msgs::Twist>("topic_cmd_vel",10);
 	state = STOP;
 	speed = NOR_SPD;
+	leftIdx1 = 0;
+	leftIdx2 = 6;
+	forIdx1 = 1;
+	forIdx2 = 7;
+	spdUpIdx = 6;
+	spdDownIdx = 7;
+	setSpd(0,0,0,0,0,0);
+	pubRate = 100;
+}
+Joystick::Joystick(int axesLeftIdx,int axesForIdx,int btnSpdUpIdx,int btnSpdDownIdx){
+	sub = nHandle.subscribe("joy",10,&Joystick::updateState,this);
+	pub = nHandle.advertise<geometry_msgs::Twist>("topic_cmd_vel",10);
+	state = STOP;
+	speed = NOR_SPD;
+	leftIdx1 = axesLeftIdx;
+	leftIdx2 = axesLeftIdx;
+	forIdx1 = axesForIdx;
+	forIdx2 = axesForIdx;
+	spdUpIdx = btnSpdUpIdx;
+	spdDownIdx = btnSpdDownIdx;
+	setSpd(0,0,0,0,0,0);
+	pubRate = 100;
+}
+Joystick::Joystick(int axesLeftIdx1,int axesLeftIdx2,int axesForIdx1, int axesForIdx2, int btnSpdUpIdx, int btnSpdDownIdx){
+	sub = nHandle.subscribe("joy",10,&Joystick::updateState,this);
+	pub = nHandle.advertise<geometry_msgs::Twist>("topic_cmd_vel",10);
+	state = STOP;
+	speed = NOR_SPD;
+	leftIdx1 = axesLeftIdx1;
+	leftIdx2 = axesLeftIdx2;
+	forIdx1 = axesForIdx1;
+	forIdx2 = axesForIdx2;
+	spdUpIdx = btnSpdUpIdx;
+	spdDownIdx = btnSpdDownIdx;
+	setSpd(0,0,0,0,0,0);
+	pubRate = 100;
 }
 
 
@@ -18,24 +53,24 @@ void Joystick::updateState(const sensor_msgs::Joy::ConstPtr& msg){
 	bool isSpdUp = false;
 	//analyse the operation
 	//is left or right
-	if(msg->axes[0]>0 || msg->axes[6]>0){
+	if(msg->axes[leftIdx1]>0 || msg->axes[leftIdx2]>0){
 		isLeft = true;
 	}
-	else if(msg->axes[0]<0 || msg->axes[6]<0){
+	else if(msg->axes[leftIdx1]<0 || msg->axes[leftIdx2]<0){
 		isRight = true;
 	}
 	//is forward or back
-	if(msg->axes[1]>0 || msg->axes[7]>0){
+	if(msg->axes[forIdx1]>0 || msg->axes[forIdx2]>0){
 		isForward = true;
 	}
-	else if(msg->axes[1]<0 || msg->axes[7]<0){
+	else if(msg->axes[forIdx1]<0 || msg->axes[forIdx2]<0){
 		isBack = true;
 	}
 	//is speed down or up
-	if(msg->buttons[6] == 1){
+	if(msg->buttons[spdUpIdx] == 1){
 		isSpdDown = true;
 	}
-	else if(msg->buttons[7] == 1){
+	else if(msg->buttons[spdDownIdx] == 1){
 		isSpdUp = true;
 	}
 	//update state and speed
@@ -84,58 +119,76 @@ void Joystick::updateState(const sensor_msgs::Joy::ConstPtr& msg){
 }
 
 void Joystick::sendCmdVel(){
-	switch(speed){
-	case HIGH_SPD:
-		cout << "high spd ";
-		break;
-	case LOW_SPD:
-		cout << "low spd  ";
-		break;
-	case NOR_SPD:
-		cout << "nor spd  ";
-		break;
-	default:
-		break;
-	}
+	geometry_msgs::Twist msgCmdVel;	
+	msgCmdVel.linear.x=msgCmdVel.linear.y=msgCmdVel.linear.z=0;
+	msgCmdVel.angular.x=msgCmdVel.angular.y=msgCmdVel.angular.z=0;
 	switch(state){
 	case FORWARD:
-		cout << "forward  ";
+		msgCmdVel.linear.x=linSpd[speed];
 		break;
 	case BACK:
-		cout << "back  ";
+		msgCmdVel.linear.x=-linSpd[speed];
 		break;
 	case LEFT:
-		cout << "left  ";
+		msgCmdVel.angular.z=angSpd[speed];
 		break;
 	case RIGHT:
-		cout << "right  ";
+		msgCmdVel.angular.z=-angSpd[speed];
 		break;
 	case FOR_LEFT:
-		cout << "for_left  ";
+		msgCmdVel.linear.x=linSpd[speed];
+		msgCmdVel.angular.z=angSpd[speed];
 		break;
 	case FOR_RIGHT:
-		cout << "for_right  ";
+		msgCmdVel.linear.x=linSpd[speed];
+		msgCmdVel.angular.z=-angSpd[speed];
 		break;
 	case BACK_LEFT:
-		cout << "back_left  ";
+		msgCmdVel.linear.x=-linSpd[speed];
+		msgCmdVel.angular.z=angSpd[speed];
 		break;
 	case BACK_RIGHT:
-		cout << "back_right  ";
+		msgCmdVel.linear.x=-linSpd[speed];
+		msgCmdVel.angular.z=-angSpd[speed];
 		break;
 	case STOP:
-		cout << "stop  ";
 		break;
 	default:
 		break;
 	}
-	cout << endl;
+	pub.publish(msgCmdVel);	
 }
 
 void Joystick::start(){
-	ros::Rate loopRate(100);
+	ros::Rate loopRate(pubRate);
 	while(ros::ok()){
 		ros::spinOnce();
 		sendCmdVel();
 		loopRate.sleep();
 	}
+}
+
+void Joystick::setSpd(double linS1,double linS2,double linS3,double angS1,double angS2,double angS3){
+	setLinSpd(linS1,linS2,linS3);
+	setAngSpd(angS1,angS2,angS3);
+}
+
+void Joystick::setLinSpd(double s1,double s2,double s3){
+	double l2hSpd[3] = {s1,s2,s3};
+	std::sort(l2hSpd,l2hSpd+2);
+	for(int i=0;i<3;i++){
+		linSpd[i] = l2hSpd[i];
+	}
+}
+
+void Joystick::setAngSpd(double s1,double s2,double s3){
+	double l2hSpd[3] = {s1,s2,s3};
+	std::sort(l2hSpd,l2hSpd+2);
+	for(int i=0;i<3;i++){
+		angSpd[i] = l2hSpd[i];
+	}
+}
+
+void Joystick::setPubRate(int rate){
+	pubRate = rate;
 }
