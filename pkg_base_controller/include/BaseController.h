@@ -4,19 +4,28 @@
 #include "ros/ros.h"
 #include "geometry_msgs/Twist.h"
 #include <string>
-
-using std::string;
+#include <cmath>
 
 class BaseController{
 private:
-	string topic_cmd_vel;
 	ros::NodeHandle nHandle;
 	ros::Subscriber cmdVelSub;
+
+	double wheelRadius;
+	double wheelDis;
+	double gearRatio;
+
 public:
-	BaseController();
-	void setTopicCmdVel(string topic);
-	void setTopicCmdVel(char* topic);
-	virtual void move()=0;
+	BaseController(double pWheelRadius=1,double pWheelDis=1,double pGearRatio=1);
+	void subCmdVel(std::string topic="cmd_vel");
+	void subCmdVel(char* topic);
+
+	void setWheelRadius(double rad);
+	void setWheelDis(double dis);
+	void setGearRatio(double rat);
+
+	void getRotateSpd(const geometry_msgs::Twist::ConstPtr& msg,double* leftSpd,double* rightSpd,double leftFixFactor=1.0,double rightFixFactor=1.0);
+	virtual void onRecCmdVel(const geometry_msgs::Twist::ConstPtr& msg)=0;
 	virtual void start();
 };
 

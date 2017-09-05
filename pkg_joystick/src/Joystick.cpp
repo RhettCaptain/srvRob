@@ -2,7 +2,7 @@
 
 Joystick::Joystick(){
 	sub = nHandle.subscribe("joy",10,&Joystick::updateState,this);
-	pub = nHandle.advertise<geometry_msgs::Twist>("topic_cmd_vel",10);
+	pub = nHandle.advertise<geometry_msgs::Twist>("cmd_vel",10);
 	state = STOP;
 	speed = NOR_SPD;
 	leftIdx1 = 0;
@@ -16,7 +16,7 @@ Joystick::Joystick(){
 }
 Joystick::Joystick(int axesLeftIdx,int axesForIdx,int btnSpdUpIdx,int btnSpdDownIdx){
 	sub = nHandle.subscribe("joy",10,&Joystick::updateState,this);
-	pub = nHandle.advertise<geometry_msgs::Twist>("topic_cmd_vel",10);
+	pub = nHandle.advertise<geometry_msgs::Twist>("cmd_vel",10);
 	state = STOP;
 	speed = NOR_SPD;
 	leftIdx1 = axesLeftIdx;
@@ -30,7 +30,7 @@ Joystick::Joystick(int axesLeftIdx,int axesForIdx,int btnSpdUpIdx,int btnSpdDown
 }
 Joystick::Joystick(int axesLeftIdx1,int axesLeftIdx2,int axesForIdx1, int axesForIdx2, int btnSpdUpIdx, int btnSpdDownIdx){
 	sub = nHandle.subscribe("joy",10,&Joystick::updateState,this);
-	pub = nHandle.advertise<geometry_msgs::Twist>("topic_cmd_vel",10);
+	pub = nHandle.advertise<geometry_msgs::Twist>("cmd_vel",10);
 	state = STOP;
 	speed = NOR_SPD;
 	leftIdx1 = axesLeftIdx1;

@@ -1,13 +1,13 @@
-#ifndef WEINUOCONTROLLER_H
-#define WEINUOCONTROLLER_H
+#ifndef EAICONTROLLER_H
+#define EAICONTROLLER_H
 
 #include "BaseController.h"
 
-class WeiNuoController:public BaseController{
+class EAIController:public BaseController{
 private:
 	
 public:
-	WeiNuoController();
+	EAIController();
 	void onRecCmdVel(const geometry_msgs::Twist::ConstPtr& msg);
 	void start();
 };
