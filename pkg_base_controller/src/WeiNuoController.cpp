@@ -32,6 +32,15 @@ void WeiNuoController::start(){
 
 }
 
-void WeiNuoController::setMotorPort(const char* motorPort){
-//	motor = SerialPort(motorPort);
+void WeiNuoController::openMotor(const char* motorPort,int baud,int dataBits,int stopBits,char parity){
+	motor = new SerialPort(motorPort);
+	motor->openPort();
+	motor->setPort(baud,dataBits,stopBits,parity);
+	motor->setBlock(false);
+}
+
+void WeiNuoController::closeMotor(){
+	if(motor!=NULL && motor->isOpen()){
+		motor->closePort();
+	}
 }

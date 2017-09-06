@@ -8,7 +8,7 @@ SerialPort::SerialPort(const char* pPortName)
 	openState = false;
 	blockState = false;
 	outTime = 5;
-	baud = 9600;
+	baud = 115200;
 	dataBits = 8;
 	stopBits = 1;
 	parity = 'n';		

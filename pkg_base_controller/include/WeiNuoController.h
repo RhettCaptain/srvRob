@@ -16,7 +16,8 @@ public:
 	void onRecCmdVel(const geometry_msgs::Twist::ConstPtr& msg);
 	void start();
 
-	void setMotorPort(const char* motorPort);
+	void openMotor(const char* motorPort,int baud=115200,int dataBits=8,int stopBits=1,char parity='n');
+	void closeMotor();
 	
 };
 
