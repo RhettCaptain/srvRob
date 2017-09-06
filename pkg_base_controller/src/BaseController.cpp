@@ -15,17 +15,32 @@ void BaseController::subCmdVel(string topic){
 void BaseController::subCmdVel(char* topic){
 	cmdVelSub = nHandle.subscribe(topic,10,&BaseController::onRecCmdVel,this);
 }
-
+/*
 void BaseController::setWheelRadius(double rad){
 	wheelRadius = rad;
 }
-
+*/
+/*
 void BaseController::setWheelDis(double dis){
 	wheelDis = dis;
 }
-
+*/
+/*
 void BaseController::setGearRatio(double rat){
 	gearRatio = rat;
+}
+*/
+
+double BaseController::getWheelRadius(){
+	return wheelRadius;
+}
+
+double BaseController::getWheelDis(){
+	return wheelDis;
+}
+
+double BaseController::getGearRatio(){
+	return gearRatio;
 }
 
 void BaseController::getRotateSpd(const geometry_msgs::Twist::ConstPtr& msg,double* leftRotateSpd,double* rightRotateSpd,double leftFixFactor,double rightFixFactor){
