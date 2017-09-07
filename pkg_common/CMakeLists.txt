@@ -108,7 +108,9 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-# include_directories(include)
+  include_directories(
+	${catkin_INCLUDE_DIRS}
+	include)
 
 ## Declare a C++ library
 # add_library(pkg_common
@@ -121,16 +123,16 @@ catkin_package(
 # add_dependencies(pkg_common ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
-# add_executable(pkg_common_node src/pkg_common_node.cpp)
+ add_executable(node_test_serial src/SerialPort.cpp test/test_serial.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(pkg_common_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(pkg_common_node
-#   ${catkin_LIBRARIES}
-# )
+  target_link_libraries(node_test_serial
+    ${catkin_LIBRARIES}
+  )
 
 #############
 ## Install ##

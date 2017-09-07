@@ -12,13 +12,16 @@ private:
 	void crc16Modbus(uchar *p, int len,uchar* hCrc,uchar* lCrc);
 	void openMotor(const char* motorPort,int baud=115200,int dataBits=8,int stopBits=1,char parity='n');
 	void closeMotor();
-	void move(int leftRotateSpd,int rightRotateSpd);	
+	void move(int leftRotateSpd,int rightRotateSpd);
+	bool getRotateSpd(int& leftRotateSpd,int& rightRotateSpd);
+	bool getTwist(double& linSpd, double& angSpd);
+	bool getTwist(geometry_msgs::Twist& msg);	
 public:
-	WeiNuoController(double pWheelRadius,double pWheelDis,double pGearRatio);
+	WeiNuoController(const char* motorPort,double pWheelRadius=0.065,double pWheelDis=0.18,double pGearRatio=52);
 	WeiNuoController(const WeiNuoController& wn);
 	WeiNuoController& operator=(const WeiNuoController& wn);
 	void onRecCmdVel(const geometry_msgs::Twist::ConstPtr& msg);
-	void start(const char* motorPort="/dev/ttyS0");
+	void start();
 
 	
 };

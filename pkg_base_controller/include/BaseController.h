@@ -28,7 +28,7 @@ public:
 	double getWheelDis();
 	double getGearRatio();
 
-	void getRotateSpd(const geometry_msgs::Twist::ConstPtr& msg,double* leftSpd,double* rightSpd,double leftFixFactor=1.0,double rightFixFactor=1.0);
+	void twist2RotateSpd(const geometry_msgs::Twist::ConstPtr& msg,double* leftSpd,double* rightSpd,double leftFixFactor=1.0,double rightFixFactor=1.0);
 	virtual void onRecCmdVel(const geometry_msgs::Twist::ConstPtr& msg)=0;
 	virtual void start();
 };

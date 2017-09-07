@@ -425,22 +425,17 @@ string SerialPort::readPort2str(int len){
 
 int SerialPort::readPort(vector<uchar> &buffer,int len){
 	char* cBuffer = new char[len];
+	buffer.resize(len);
 	int nBytes = readPort(cBuffer,len);
 	if(nBytes == -1){
 		return -1;
 	}
 	else{
 		for(int i=0;i<nBytes;i++){
-			buffer.push_back((uchar)cBuffer[i]);
+			buffer[i] = (uchar)cBuffer[i];
 		}
 		return nBytes;
 	}
-}
-
-vector<uchar> SerialPort::readPort2vec(int len){
-	vector<uchar> vec;
-	readPort(vec,len);
-	return vec;
 }
 
 int SerialPort::readline(char* buffer,int len,char eol){

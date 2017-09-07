@@ -12,7 +12,7 @@
 #include <string>
 #include <vector>
 
-typedef unsigned int uchar;
+typedef unsigned char uchar;
 using std::vector;
 using std::string;
 using std::cout;
@@ -70,7 +70,6 @@ public:
 	int readPort(string &buffer,int len=100);
 	string readPort2str(int len=100);
 	int readPort(vector<uchar> &buffer,int len=100);
-	vector<uchar> readPort2vec(int len=100);
 	int readline(char* buffer,int len,char eol='\n');
 	int readline(string &buffer,int len=100,char eol='\n');
 	string readline(int len=100,char eol='\n');

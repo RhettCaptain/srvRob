@@ -43,7 +43,7 @@ double BaseController::getGearRatio(){
 	return gearRatio;
 }
 
-void BaseController::getRotateSpd(const geometry_msgs::Twist::ConstPtr& msg,double* leftRotateSpd,double* rightRotateSpd,double leftFixFactor,double rightFixFactor){
+void BaseController::twist2RotateSpd(const geometry_msgs::Twist::ConstPtr& msg,double* leftRotateSpd,double* rightRotateSpd,double leftFixFactor,double rightFixFactor){
 	double linSpd = msg->linear.x;
 	double angSpd = msg->angular.z;
 	double leftLinSpd = linSpd - angSpd * wheelDis / 2;
