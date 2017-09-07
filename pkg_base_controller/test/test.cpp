@@ -2,6 +2,6 @@
 
 int main(int argc,char** argv){
 	ros::init(argc,argv,"bc");
-	BaseController* baseController = new WeiNuoController("/dev/ttyUSB1");
+	BaseController* baseController = new WeiNuoController("/dev/ttyS4");
 	baseController->start();
 }

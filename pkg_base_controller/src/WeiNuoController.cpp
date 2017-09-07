@@ -145,12 +145,10 @@ void WeiNuoController::move(int leftRotateSpd,int rightRotateSpd){
 	crc16Modbus(&moveCmd[1],5,&moveCmd[6],&moveCmd[7]);
 	moveCmd[8] = 0x05;
 	motor->writePort(moveCmd);	//send cmd
-
 usleep(30*1000);
 int ls,rs;
-getRotateSpd(ls,rs);
+//getRotateSpd(ls,rs);
 	cout << "ls: " << ls << " rs: " << rs << endl;
-
 }
 
 bool WeiNuoController::getRotateSpd(int& leftRotateSpd,int& rightRotateSpd){
@@ -163,7 +161,6 @@ bool WeiNuoController::getRotateSpd(int& leftRotateSpd,int& rightRotateSpd){
 	crc16Modbus(&queryCmd[1],3,&queryCmd[4],&queryCmd[5]);
 	queryCmd[6] = 0x05;
 	motor->writePort(queryCmd);
-	
 	//read data from hall sensor
 	char ch=0xff;
 	vector<uchar> hallBuffer(13);
@@ -175,8 +172,8 @@ bool WeiNuoController::getRotateSpd(int& leftRotateSpd,int& rightRotateSpd){
 		motor->readPort(&ch,1);
 		errCount++;
 		if(errCount >=14){
-			motor->flush();
-			break;
+			motor->inFlush();
+			return false ;
 		}
 	}
 	motor->readPort(hallBuffer,13);

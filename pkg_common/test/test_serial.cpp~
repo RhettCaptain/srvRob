@@ -109,7 +109,7 @@ int main()
     printf("This program updates last time at %s   %s\n",__TIME__,__DATE__);  
     printf("STDIO COM1\n");  
     int fd;  
-    fd = open("/dev/ttyS4",O_RDWR);  
+    fd = open("/dev/ttyUSB0",O_RDWR);  
     if(fd == -1)  
     {  
         perror("serialport error\n");  
@@ -127,17 +127,7 @@ int main()
         exit (0);  
     }  
     char buf[] = "fe55aa07bc010203040506073d";  
-    buf[0] = 0x1b;
-    buf[1] = 0x01;
-    buf[2] = 0x07;
-    buf[3] = 0x57;
-    buf[4] = 0x0a;
-    buf[5] = 0x90;
-    buf[6] = 0xa8;
-    buf[7] = 0xaf;
-    buf[8] = 0x05;
-    write(fd,&buf,9);
-    /*  
+    write(fd,&buf,26);  
     char buff[512];   
     int nread;    
     while(1)  
@@ -150,6 +140,6 @@ int main()
 	    printf("\n");  
         }  
     }  
-    close(fd);  */
+    close(fd);  
     return 0;  
 }  
