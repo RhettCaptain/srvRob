@@ -7,6 +7,8 @@ using std::endl;
 WeiNuoController::WeiNuoController(const char* motorPort,double pWheelRadius,double pWheelDis,double pGearRatio):BaseController(pWheelRadius,pWheelDis,pGearRatio){
 	motorDir = FF;
 	openMotor(motorPort);
+	pub = nHandle.advertise<nav_msgs::Odometry>("topic_odometer_sensor",10);
+	getHallCount(leftHallCount,rightHallCount);
 }
 
 WeiNuoController::WeiNuoController(const WeiNuoController& wn):BaseController(getWheelRadius(),getWheelDis(),getGearRatio()){
@@ -19,11 +21,11 @@ WeiNuoController& WeiNuoController::operator=(const WeiNuoController& wn){
 	motorDir = wn.motorDir;
 	return *this;
 }
+
 void WeiNuoController::onRecCmdVel(const geometry_msgs::Twist::ConstPtr& msg){
 	double l,r;
 	twist2RotateSpd(msg,&l,&r);
 	move(l,r);
-	cout << "left:" << l << " right:" << r << endl;
 }
 
 void WeiNuoController::start(){
@@ -31,6 +33,7 @@ void WeiNuoController::start(){
 	ros::Rate loop(100);
 	while(ros::ok()){
 		ros::spinOnce();
+		pubOdometerMsg();
 		loop.sleep();
 	}
 
@@ -49,7 +52,6 @@ void WeiNuoController::closeMotor(){
 		motor->closePort();
 	}
 }
-
 
 void WeiNuoController::crc16Modbus(uchar *p, int len,uchar* hCrc,uchar* lCrc)
 {
@@ -106,35 +108,6 @@ void WeiNuoController::move(int leftRotateSpd,int rightRotateSpd){
 	//send the cmd to motor driver
 	leftRotateSpd = abs(leftRotateSpd);
 	rightRotateSpd = abs(rightRotateSpd);
-/*	const int minSpd = 700;
-	const int maxSpd = 5000;
-	if(leftRotateSpd<minSpd && leftRotateSpd>0){
-		leftRotateSpd = minSpd;
-		cout << "min rotate spd is" << minSpd << endl;
-	}
-	else if(leftRotateSpd > maxSpd){
-		leftRotateSpd = maxSpd;
-		cout << "max rotate spd is" << maxSpd << endl;
-	}
-	if(rightRotateSpd<minSpd && rightRotateSpd>0){
-		rightRotateSpd = 0;
-		cout << "min rotate spd is" << minSpd << endl;
-	}
-	else if(rightRotateSpd > maxSpd){
-		rightRotateSpd = maxSpd;
-		cout << "max rotate spd is" << maxSpd << endl;
-	}
-	const int diffLimit = 300;
-	if(motorDir == FF || motorDir == BB){
-		if((leftRotateSpd - rightRotateSpd) > diffLimit){
-			leftRotateSpd = rightRotateSpd + diffLimit;
-			cout << "max diff limit is " << diffLimit << endl;
-		}
-		else if((rightRotateSpd - leftRotateSpd) > diffLimit){
-			rightRotateSpd = leftRotateSpd + diffLimit;
-			cout << "max diff limit is " << diffLimit << endl;
-		}
-	}*/
 	vector<uchar> moveCmd(9);
 	moveCmd[0] = 0x1b;
 	moveCmd[1] = motorDir^0x10;
@@ -145,13 +118,9 @@ void WeiNuoController::move(int leftRotateSpd,int rightRotateSpd){
 	crc16Modbus(&moveCmd[1],5,&moveCmd[6],&moveCmd[7]);
 	moveCmd[8] = 0x05;
 	motor->writePort(moveCmd);	//send cmd
-usleep(30*1000);
-int ls,rs;
-//getRotateSpd(ls,rs);
-	cout << "ls: " << ls << " rs: " << rs << endl;
 }
 
-bool WeiNuoController::getRotateSpd(int& leftRotateSpd,int& rightRotateSpd){
+bool WeiNuoController::getHallCount(int& leftHallCount,int& rightHallCount){
 	//send query command
 	vector<uchar> queryCmd(7);
 	queryCmd[0] = 0x1b;
@@ -178,10 +147,9 @@ bool WeiNuoController::getRotateSpd(int& leftRotateSpd,int& rightRotateSpd){
 	}
 	motor->readPort(hallBuffer,13);
 	hallBuffer.insert(hallBuffer.begin(),ch);
-for(int i=0;i<14;i++){printf("%x \n",hallBuffer[i]);}cout<<endl;	
 	//analyse the speed
-	leftRotateSpd = hallBuffer[3]<<24 + hallBuffer[4]<<16 + hallBuffer[5]<<8 + hallBuffer[6];
-	rightRotateSpd = hallBuffer[7]<<24 + hallBuffer[8]<<16 + hallBuffer[9]<<8 + hallBuffer[10];
+	leftHallCount = hallBuffer[3]<<24 + hallBuffer[4]<<16 + hallBuffer[5]<<8 + hallBuffer[6];
+	rightHallCount = hallBuffer[7]<<24 + hallBuffer[8]<<16 + hallBuffer[9]<<8 + hallBuffer[10];
 
 	//check validness
 	if(hallBuffer[0] == 0x1b && hallBuffer[1] == 0x20 && hallBuffer[2] == 0x08 && hallBuffer[13] == 0x05){
@@ -191,3 +159,129 @@ for(int i=0;i<14;i++){printf("%x \n",hallBuffer[i]);}cout<<endl;
 		return false;
 	}
 }	
+
+
+bool WeiNuoController::getRotateSpd(double& leftRotateSpd,double& rightRotateSpd){
+	//send query command
+	vector<uchar> queryCmd(7);
+	queryCmd[0] = 0x1b;
+	queryCmd[1] = 0x21;
+	queryCmd[2] = 0x01;
+	queryCmd[3] = 0x00;
+	crc16Modbus(&queryCmd[1],3,&queryCmd[4],&queryCmd[5]);
+	queryCmd[6] = 0x05;
+	motor->writePort(queryCmd);
+	//read data from hall sensor
+	char ch=0xff;
+	vector<uchar> hallBuffer(13);
+	for(int i =0;i<13;i++){
+		hallBuffer[i] = 0xff;
+	}
+	int errCount = 0;
+	while(ch!=0x1b){
+		motor->readPort(&ch,1);
+		errCount++;
+		if(errCount >=14){
+			motor->inFlush();
+			return false ;
+		}
+	}
+	motor->readPort(hallBuffer,13);
+	hallBuffer.insert(hallBuffer.begin(),ch);
+	//analyse the speed
+	leftRotateSpd = hallBuffer[5]<<8 + hallBuffer[6];
+	rightRotateSpd = hallBuffer[9]<<8 + hallBuffer[10];
+
+	//check validness
+	if(hallBuffer[0] == 0x1b && hallBuffer[1] == 0x21 && hallBuffer[2] == 0x08 && hallBuffer[13] == 0x05){
+		return true;
+	}
+	else{
+		return false;
+	}
+}	
+
+bool WeiNuoController::getTwist(double& linSpd,double& angSpd){
+	double leftRotateSpd,rightRotateSpd;
+	if(getRotateSpd(leftRotateSpd,rightRotateSpd)){
+		rotateSpd2Twist(linSpd,angSpd,leftRotateSpd,rightRotateSpd);
+		return true;
+	}	
+	else{
+		return false;
+	}
+}
+
+bool WeiNuoController::getTwist(geometry_msgs::Twist& msg){
+	double leftRotateSpd,rightRotateSpd;
+	if(getRotateSpd(leftRotateSpd,rightRotateSpd)){
+		rotateSpd2Twist(msg,leftRotateSpd,rightRotateSpd);
+		return true;
+	}	
+	else{
+		return false;
+	}
+}
+
+void WeiNuoController::pubOdometerMsg(){
+	//update hall count and get postion change
+	int newLeftHallCount,newRightHallCount;
+	bool postionReq = getHallCount(newLeftHallCount,newRightHallCount);
+	double linDis,angDis;
+	if(postionReq){
+		const double pulsePerRound = 2 * 3;
+		double leftRotateRound,rightRotateRound;
+		//over flow handle and get rotate round
+		const int upFlowLimit = 0x8fffffff; 
+		const int downFlowLimit = 0xf0000000;
+		//left
+		if(newLeftHallCount > upFlowLimit/2 && leftHallCount < downFlowLimit/2){
+			leftRotateRound = ((downFlowLimit-leftHallCount) + (newLeftHallCount - upFlowLimit)) / pulsePerRound;
+		}
+		else if(newLeftHallCount < downFlowLimit/2 && leftHallCount > upFlowLimit/2){
+			leftRotateRound = ((newLeftHallCount-downFlowLimit) + (upFlowLimit-leftHallCount)) / pulsePerRound;
+		}
+		else{
+			leftRotateRound = (newLeftHallCount - leftHallCount)/ pulsePerRound;
+		}
+		//right
+		if(newRightHallCount > upFlowLimit/2 && rightHallCount < downFlowLimit/2){
+			rightRotateRound = ((downFlowLimit-rightHallCount) + (newRightHallCount - upFlowLimit)) / pulsePerRound;
+		}
+		else if(newRightHallCount < downFlowLimit/2 && rightHallCount > upFlowLimit/2){
+			rightRotateRound = ((newRightHallCount-downFlowLimit) + (upFlowLimit-rightHallCount)) / pulsePerRound;
+		}
+		else{
+			rightRotateRound = (newRightHallCount - rightHallCount)/ pulsePerRound;
+		}
+		//get position change distance
+		rotateSpd2Twist(linDis,angDis,leftRotateRound,rightRotateRound);
+		//update hall count
+		leftHallCount = newLeftHallCount;
+		rightHallCount = newRightHallCount;
+	}
+
+	//get twist
+	double linSpd,angSpd;
+	bool twistReq = getTwist(linSpd,angSpd);
+		
+	//publish infomation if ok
+	if(postionReq && twistReq){
+		nav_msgs::Odometry odometerMsg;
+		odometerMsg.header.stamp = ros::Time();
+		odometerMsg.header.frame_id = "base_link";
+		odometerMsg.pose.pose.position.x = linDis;
+		odometerMsg.pose.pose.position.y = 0;
+		odometerMsg.pose.pose.position.z = 0;
+		odometerMsg.pose.pose.orientation = tf::createQuaternionMsgFromYaw(angDis);
+		odometerMsg.twist.twist.linear.x = linSpd;
+		odometerMsg.twist.twist.linear.y = 0;
+		odometerMsg.twist.twist.linear.z = 0;
+		odometerMsg.twist.twist.angular.x = 0;
+		odometerMsg.twist.twist.angular.y = 0;
+		odometerMsg.twist.twist.angular.z = angSpd;
+		//pub
+		pub.publish(odometerMsg);
+	}
+}
+
