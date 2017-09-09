@@ -12,7 +12,6 @@ private:
 	ros::NodeHandle nHandle;
 	ros::Publisher pub;
 	int leftHallCount,rightHallCount;
-	ros::Time cmdVelTime;
 	
 	enum MotorDir{FF=0x11,FB=0x10,BF=0x01,BB=0x00}motorDir;
 	void crc16Modbus(uchar *p, int len,uchar* hCrc,uchar* lCrc);
@@ -24,7 +23,6 @@ private:
 	bool getTwist(double& linSpd, double& angSpd);
 	bool getTwist(geometry_msgs::Twist& msg);
 	void pubOdometerMsg();	
-	void pubFakeOdometerMsg(const geometry_msgs::Twist::ConstPtr& msg);
 public:
 	WeiNuoController(const char* motorPort,double pWheelRadius=0.065,double pWheelDis=0.18,double pGearRatio=52);
 	WeiNuoController(const WeiNuoController& wn);

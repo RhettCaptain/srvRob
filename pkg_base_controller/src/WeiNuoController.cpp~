@@ -27,7 +27,7 @@ void WeiNuoController::onRecCmdVel(const geometry_msgs::Twist::ConstPtr& msg){
 	double l,r;
 	twist2RotateSpd(msg,&l,&r);
 	move(l,r);
-	pubFakeOdometerMsg(msg);	//it's a fake msg using open-loop and integration
+	pubFakeOdometerMsg();	//it's a fake msg using open-loop and integration
 }
 
 void WeiNuoController::start(){
