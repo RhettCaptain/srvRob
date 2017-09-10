@@ -72,6 +72,21 @@ void BaseController::rotateSpd2Twist(geometry_msgs::Twist& msg,const double left
 	msg.angular.z = angSpd;
 }
 
+double BaseController::rotateRound2Dis(double round){
+	double dis = round / gearRatio * M_PI * wheelRadius / 30;
+	return dis;
+}
+
+void BaseController::dis2Shift(double& linDis,double& angDis,const double leftDis,const double rightDis){
+	angDis = (rightDis - leftDis) / wheelDis;
+	if(angDis == 0){
+		linDis = leftDis;
+	}
+	else{
+		linDis = (leftDis + rightDis) / angDis * sin(angDis/2);
+	}
+}
+
 void BaseController::start(){
 	ros::spin();
 }

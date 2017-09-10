@@ -9,7 +9,7 @@ WeiNuoController::WeiNuoController(const char* motorPort,double pWheelRadius,dou
 	openMotor(motorPort);
 	pub = nHandle.advertise<nav_msgs::Odometry>("topic_odometer_sensor",10);
 	getHallCount(leftHallCount,rightHallCount);
-	cmdVelTime = ros::Time();
+	pubTime = ros::Time();
 }
 
 WeiNuoController::WeiNuoController(const WeiNuoController& wn):BaseController(getWheelRadius(),getWheelDis(),getGearRatio()){
@@ -231,7 +231,7 @@ void WeiNuoController::pubOdometerMsg(){
 	bool postionReq = getHallCount(newLeftHallCount,newRightHallCount);
 	double linDis,angDis;
 	if(postionReq){
-		const double pulsePerRound = 2 * 3;
+		const double pulsePerRound = 7 * 3;	//7 polar pairs
 		double leftRotateRound,rightRotateRound;
 		//over flow handle and get rotate round
 		const int upFlowLimit = 0x8fffffff; 
@@ -257,7 +257,7 @@ void WeiNuoController::pubOdometerMsg(){
 			rightRotateRound = (newRightHallCount - rightHallCount)/ pulsePerRound;
 		}
 		//get position change distance
-		rotateSpd2Twist(linDis,angDis,leftRotateRound,rightRotateRound);
+		dis2Shift(linDis,angDis,rotateRound2Dis(leftRotateRound),rotateRound2Dis(rightRotateRound));
 		//update hall count
 		leftHallCount = newLeftHallCount;
 		rightHallCount = newRightHallCount;
@@ -289,9 +289,9 @@ void WeiNuoController::pubOdometerMsg(){
 
 void WeiNuoController::pubFakeOdometerMsg(const geometry_msgs::Twist::ConstPtr& msg){
 	//integrate the spd to dis
-	ros::Time newCmdVelTime = ros::Time();
-	double deltaTime = (newCmdVelTime - cmdVelTime).toSec();
-	cmdVelTime = newCmdVelTime; 	//update the cmd vel time
+	ros::Time newPubTime = ros::Time();
+	double deltaTime = (newPubTime - pubTime).toSec();
+	pubTime = newPubTime; 	//update the odometer msg publish time
 	double linDis = msg->linear.x * deltaTime;
 	double angDis = msg->angular.z * deltaTime;
 
@@ -300,7 +300,7 @@ void WeiNuoController::pubFakeOdometerMsg(const geometry_msgs::Twist::ConstPtr& 
 		
 	//publish infomation 
 	nav_msgs::Odometry odometerMsg;
-	odometerMsg.header.stamp = cmdVelTime;
+	odometerMsg.header.stamp = pubTime;
 	odometerMsg.header.frame_id = "base_link";
 	odometerMsg.pose.pose.position.x = linDis;
 	odometerMsg.pose.pose.position.y = 0;

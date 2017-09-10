@@ -27,10 +27,14 @@ public:
 	double getWheelRadius();
 	double getWheelDis();
 	double getGearRatio();
-
+	
 	void twist2RotateSpd(const geometry_msgs::Twist::ConstPtr& msg,double* leftSpd,double* rightSpd,double leftFixFactor=1.0,double rightFixFactor=1.0);
 	void rotateSpd2Twist(double& linSpd,double& angSpd,const double leftRotateSpd,const double rightRotateSpd,double leftFixFactor=1.0,double rightFixFactor=1.0);
 	void rotateSpd2Twist(geometry_msgs::Twist& msg,const double leftRotateSpd,const double rightRotateSpd,double leftFixFactor=1.0,double rightFixFactor=1.0);
+	//get the distance one wheel move according the round motor rotates
+	double rotateRound2Dis(double round);
+	//get the linear distance and angular shift from two wheels' distance 
+	void dis2Shift(double& linDis,double& angDis,const double leftDis,const double rightDis);
 	virtual void onRecCmdVel(const geometry_msgs::Twist::ConstPtr& msg)=0;
 	virtual void start();
 };
