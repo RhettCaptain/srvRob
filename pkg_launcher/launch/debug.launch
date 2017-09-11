@@ -2,5 +2,5 @@
 	<node pkg="joy" name="joy_node" type="joy_node"/>
 	<node pkg="pkg_joystick" name="node_joystick" type="node_joystick"/>
 	<node pkg="pkg_base_controller" name="node_base_controller" type="node_base_controller"/>
-	<node pkg="pkg_odometry" name="node_odometry" type="node_odometry"/>
+	<node pkg="pkg_odometry" name="node_odometry" type="node_odometry" output="screen"/>
 </launch>

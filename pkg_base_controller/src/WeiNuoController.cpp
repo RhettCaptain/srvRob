@@ -9,7 +9,7 @@ WeiNuoController::WeiNuoController(const char* motorPort,double pWheelRadius,dou
 	openMotor(motorPort);
 	pub = nHandle.advertise<nav_msgs::Odometry>("topic_odometer_sensor",10);
 	getHallCount(leftHallCount,rightHallCount);
-	pubTime = ros::Time();
+	pubTime = ros::Time::now();
 }
 
 WeiNuoController::WeiNuoController(const WeiNuoController& wn):BaseController(getWheelRadius(),getWheelDis(),getGearRatio()){
@@ -285,16 +285,17 @@ void WeiNuoController::pubOdometerMsg(){
 		//pub
 		pub.publish(odometerMsg);
 	}
+	pubTime = ros::Time::now();
 }
 
 void WeiNuoController::pubFakeOdometerMsg(const geometry_msgs::Twist::ConstPtr& msg){
 	//integrate the spd to dis
-	ros::Time newPubTime = ros::Time();
+	ros::Time newPubTime = ros::Time::now();
 	double deltaTime = (newPubTime - pubTime).toSec();
 	pubTime = newPubTime; 	//update the odometer msg publish time
 	double linDis = msg->linear.x * deltaTime;
 	double angDis = msg->angular.z * deltaTime;
-
+std::cout << "deltaTime: " << deltaTime << " angDis: " << msg->angular.z << std::endl;
 	//get twist
 	//trust the expected twist
 		
@@ -309,5 +310,6 @@ void WeiNuoController::pubFakeOdometerMsg(const geometry_msgs::Twist::ConstPtr& 
 	odometerMsg.twist.twist = *msg;
 	//pub
 	pub.publish(odometerMsg);
+	pubTime = newPubTime;
 }
 
