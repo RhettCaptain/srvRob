@@ -1,0 +1,109 @@
+使用tinyXML2解析XML
+一、下载配置
+github: https://github.com/leethomason/tinyxml2
+使用方法：将tinyxml2.cpp和tinyxml2.h拷贝至项目目录，
+使用时包含#include “tinyxml2.h”和using namespace tinyxml2。
+
+二、使用
+1.创建
+int createXML(const char* xmlPath)
+{
+    const char* declaration ="<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>";
+    XMLDocument doc;
+    doc.Parse(declaration);//会覆盖xml所有内容
+
+    //添加申明可以使用如下两行
+    //XMLDeclaration* declaration=doc.NewDeclaration();
+    //doc.InsertFirstChild(declaration);
+
+		//插入根节点
+    XMLElement* root=doc.NewElement("DBUSER");
+    doc.InsertEndChild(root);
+
+    return doc.SaveFile(xmlPath);
+}
+
+2.插入节点
+int insertXMLNode(const char* xmlPath,const User& user)
+{
+    XMLDocument doc;
+    int res=doc.LoadFile(xmlPath);		//加载
+    if(res!=0){}	//加载失败
+    
+    XMLElement* root=doc.RootElement();		//获得根节点
+
+    XMLElement* userNode = doc.NewElement("User");
+    userNode->SetAttribute("Name","rhett");		//设置节点属性
+    userNode->SetAttribute("Password ","123");
+    root->InsertEndChild(userNode);	//在指定节点（root)间插入新节点(userNode)
+
+    XMLElement* anotherRoot = doc.NewElement("User");
+    doc.InsertEndChild(anotherRoot);	//在文档中插入根节点
+
+    return doc.SaveFile(xmlPath);
+}
+
+3.查询节点
+XMLElement* queryUserByName(XMLElement* root){
+	XMLElement* userNode = root->FirstChildElement("User");		//查找根节点下，第一个User子节点
+	while(userNode!=NULL){
+		if(strcmp( cosnt_cast<char*>(userNode->Attribute("Name")),const_cast<char*>("rhett") ) == 0){
+			//比较节点的Name属性
+		cout << userNode->GetText());	//得到节点标签内的文本内容。
+			break;
+		}
+		userNode = userNode->NextSiblingElement();		//下一个兄弟节点
+	}
+	return userNode;
+}
+
+4.修改节点
+XMLElement* userNode=queryUserNodeByName(root,user->userName);
+
+if(userNode!=NULL){
+        if(user->password!=userNode->Attribute("Password")){
+            userNode->SetAttribute("Password",user->password.c_str());  //修改属性
+        }
+        XMLElement* genderNode=userNode->FirstChildElement("Gender");
+        if(user->gender!=atoi(genderNode->GetText()))  {
+            genderNode->SetText(itoa(user->gender).c_str());   //修改节点内容
+        }
+}
+
+5.删除节点
+XMLElement* root=doc.RootElement();
+//doc.DeleteNode(root);//删除xml所有节点
+if(userNode!=NULL){
+    	userNode->DeleteAttribute("Password");//删除属性
+        XMLElement* emailNode=userNode->FirstChildElement("Email");
+        userNode->DeleteChild(emailNode); //删除指定节点
+        //userNode->DeleteChildren();//删除节点的所有孩子节点
+        if(doc.SaveFile(xmlPath)==0)
+            return true;
+ }
+
+6.核心函数整理
+--文件--
+XMLDocument doc;			//文件对象
+int res=doc.LoadFile(xmlPath);		//加载
+return doc.SaveFile(xmlPath);		//保存
+--节点查询--
+XMLElement* anotherRoot = doc.NewElement("User");	//创建节点
+XMLElement* root=doc.RootElement();		//获得根节点
+userNode = userNode->NextSiblingElement();		//下一个兄弟节点
+userNode = root->FirstChildElement("User");		//查找根节点下，第一个User子节点
+--节点插入--
+XMLDeclaration* declaration=doc.NewDeclaration();	//声明
+doc.InsertFirstChild(declaration);	//头部插入节点
+root->InsertEndChild(userNode);	//在指定节点（root)间插入新节点(userNode)（尾部插入）
+--属性内容--
+userNode->SetAttribute("Name","rhett");		//设置节点属性
+genderNode->SetText(itoa(user->gender).c_str());   //修改节点内容
+userNode->Attribute("Password")；	//获得属性值
+genderNode->GetText(itoa(user->gender).c_str());   //获取节点内容
+--删除--
+doc.DeleteNode(root);	//删除节点
+userNode->DeleteAttribute("Password");	//删除属性
+userNode->DeleteChild(emailNode); //删除指定子节点
+userNode->DeleteChildren();//删除节点的所有孩子节点
+
