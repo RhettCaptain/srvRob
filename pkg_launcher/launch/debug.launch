@@ -6,5 +6,8 @@
 	<node pkg="tf" type="static_transform_publisher" name="base_link2laser_tf" args="0 0 0 0 0 0 1 base_link laser 20" />
 	<node pkg="lms1xx" type="LMS1xx_node" name="node_laser"/>
 	<node pkg="pkg_pose" type="node_init_pose" name="node_init_pose"/>
-	<node pkg="hector_mapping" type="hector_mapping" name="node_slam" output="screen" /> 
+	<node pkg="hector_mapping" type="hector_mapping" name="node_slam" output="screen">
+		<param name="laser_min_dis" value="0.72" />
+		<param name="laser_max_dis" value="5.01" />
+	</node> 
 </launch>
