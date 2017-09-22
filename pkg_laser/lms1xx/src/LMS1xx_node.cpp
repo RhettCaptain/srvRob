@@ -46,7 +46,7 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "lms1xx");
   ros::NodeHandle nh;
   ros::NodeHandle n("~");
-  ros::Publisher scan_pub = nh.advertise<sensor_msgs::LaserScan>("scan", 1);
+  ros::Publisher scan_pub = nh.advertise<sensor_msgs::LaserScan>("topic_raw_scan", 1);
 
   n.param<std::string>("host", host, "192.168.0.1");
   n.param<std::string>("frame_id", frame_id, "laser");
