@@ -7,9 +7,9 @@ Odometry::Odometry(double x,double y,double th){
 	odometryPose.position.x = x;
 	odometryPose.position.y = y;
 	odometryPose.position.z = 0;
-	odometryPose.orientation.x = 0;
+	odometryPose.orientation.x = 1;
 	odometryPose.orientation.y = 0;
-	odometryPose.orientation.z = th;
+	odometryPose.orientation.z = 0;
 	odometryPose.orientation.w = 0;
 	
 	odometryTwist.linear.x = 0;
@@ -61,7 +61,7 @@ void Odometry::broadcastTf(){
 	base2OdomTf.transform.translation.x = odometryPose.position.x;
 	base2OdomTf.transform.translation.y = odometryPose.position.y;
 	base2OdomTf.transform.translation.z = odometryPose.position.z;
-	base2OdomTf.transform.rotation  = tf::createQuaternionMsgFromYaw(odometryPose.orientation.z);
+	base2OdomTf.transform.rotation  = tf::createQuaternionMsgFromYaw(tf::getYaw(odometryPose.orientation));
 std::cout << base2OdomTf.transform.translation.x << std::endl;	
 std::cout << base2OdomTf.transform.translation.y << std::endl;	
 std::cout << base2OdomTf.transform.translation.z << std::endl;	
@@ -76,11 +76,12 @@ std::cout << "-------------------------" << std::endl;
 void Odometry::onRecOdometerMsg(const nav_msgs::Odometry::ConstPtr& msg){
 	double deltaDis = msg->pose.pose.position.x;
 	double deltaAng = msg->pose.pose.orientation.z;
-	odometryPose.position.x += deltaDis * cos(deltaAng / 2 + odometryPose.orientation.z);
-	odometryPose.position.y += deltaDis * sin(deltaAng / 2 + odometryPose.orientation.z);
-	odometryPose.orientation.z += deltaAng;
-	normalizeAng(odometryPose.orientation.z);
-
+	double rawAng = tf::getYaw(odometryPose.orientation);
+	odometryPose.position.x += deltaDis * cos(deltaAng / 2 + rawAng);
+	odometryPose.position.y += deltaDis * sin(deltaAng / 2 + rawAng);
+	double newAng = rawAng + deltaAng;
+	normalizeAng(newAng);
+	odometryPose.orientation = tf::createQuaternionMsgFromYaw(newAng);
 	odometryTwist = msg->twist.twist;
 }
 
