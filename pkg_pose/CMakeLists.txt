@@ -137,7 +137,7 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
  add_executable(node_init_pose src/init_pose.cpp ${COMMON_PATH}/tinyxml2/src/tinyxml2.cpp)
-
+ add_executable(node_pub_pose src/pub_pose.cpp src/PoseHandler.cpp)
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -152,7 +152,9 @@ include_directories(
  target_link_libraries(node_init_pose
    ${catkin_LIBRARIES}
  )
-
+ target_link_libraries(node_pub_pose 
+   ${catkin_LIBRARIES}
+ )
 #############
 ## Install ##
 #############
