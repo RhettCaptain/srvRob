@@ -13,6 +13,7 @@ WeiNuoController::WeiNuoController(const char* motorPort,double pWheelRadius,dou
 }
 
 WeiNuoController::WeiNuoController(const WeiNuoController& wn):BaseController(getWheelRadius(),getWheelDis(),getGearRatio()){
+	motor = new SerialPort("");
 	*motor = *(wn.motor);
 	motorDir = wn.motorDir;
 }

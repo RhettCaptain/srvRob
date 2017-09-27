@@ -5,7 +5,7 @@
 #include <string>
 using namespace std;
 int main(){
-	SerialPort* sp = new SerialPort("/dev/ttyS4");
+	SerialPort* sp = new SerialPort("/dev/ttyUSB2");
 	sp->openPort();
 //	vector<unsigned char> vecFL(9);
 	char vecFL[9];
