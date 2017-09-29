@@ -443,7 +443,9 @@ int SerialPort::readline(char* buffer,int len,char eol){
 	int idx=0;
 	while(ch!=eol){
 		if(readPort(&ch,1)>0){
-			buffer[idx++] = ch;		
+			if(ch!=eol){
+				buffer[idx++] = ch;		
+			}
 		}
 		if(idx==len){
 			cout << "no eol in len bytes" << endl;

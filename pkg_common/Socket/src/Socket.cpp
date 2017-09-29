@@ -137,7 +137,9 @@ int SocketServer::readline(char* buffer, int len, char eol,int clientIdx){
 	int idx=0;
 	while(ch!=eol){
 		if(readSock(&ch,1,clientIdx)>0){
-			buffer[idx++] = ch;
+			if(ch!=eol){
+				buffer[idx++] = ch;
+			}
 		}
 		if(idx==len){
 			std::cout << "no eol in len bytes" << std::endl;
@@ -304,7 +306,9 @@ int SocketClient::readline(char* buffer,int len,char eol){
 	int idx=0;
 	while(ch!=eol){
 		if(readSock(&ch,1)>0){
-			buffer[idx++] = ch;
+			if(ch!=eol){
+				buffer[idx++] = ch;
+			}
 		}
 		if(idx==len){
 			std::cout << "no eol in len bytes" << std::endl;
