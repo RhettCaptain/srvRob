@@ -7,14 +7,13 @@ WebHandler::WebHandler(const char* ip,unsigned short int port){
 	while(ros::ok() &&  !sock.connectServer(ip,port) ){
 	//	connecting...
 	}
-std::cout << "debug10" << std::endl;	
 	while(ros::ok()){
 		string cmd;
 		if(sock.readSock(cmd)>0){
-std::cout << cmd << std::endl;
 			if(cmd == "CMD_PUB_GOAL"){
 				pubGoal();		
 			}
+			else if(cmd == "CMD_
 		}
 		
 	}
