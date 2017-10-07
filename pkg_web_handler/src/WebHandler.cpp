@@ -13,7 +13,7 @@ WebHandler::WebHandler(const char* ip,unsigned short int port){
 			if(cmd == "CMD_PUB_GOAL"){
 				pubGoal();		
 			}
-			else if(cmd == "CMD_
+		
 		}
 		
 	}

@@ -121,6 +121,12 @@ void WeiNuoController::move(int leftRotateSpd,int rightRotateSpd){
 	crc16Modbus(&moveCmd[1],5,&moveCmd[6],&moveCmd[7]);
 	moveCmd[8] = 0x05;
 	motor->writePort(moveCmd);	//send cmd
+std::cout << std::hex;
+//for(uchar c:moveCmd){
+//  std::cout <<(int)c << " " ;
+//}
+std::cout<< std::endl;
+std::dec;
 }
 
 bool WeiNuoController::getHallCount(int& leftHallCount,int& rightHallCount){
