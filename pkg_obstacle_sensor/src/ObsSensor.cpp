@@ -60,8 +60,8 @@ void ObsSensor::setSensorPose(int idx,const double x,const double y,const double
 void ObsSensor::start(int pBaud,int pDataBits,int pStopBits,char pParity){
 	port->openPort();
 	port->setPort(pBaud,pDataBits,pStopBits,pParity);
-	port->setInMode('r');
-	port->setOutMode('r');
+//	port->setInMode('r');
+//	port->setOutMode('r');
 	pubObstaclesPose();
 }
 
@@ -70,6 +70,7 @@ void ObsSensor::pubObstaclesPose(){
 		char tmp=0xFF;
 		while(tmp!=0xBB){
 			port->readPort(&tmp,1);
+std::cout << "debug" << std::endl;
 std::cout << std::hex;
 if((int)tmp != -1){
 std::cout << "drop: " <<(unsigned int)tmp << std::endl;
