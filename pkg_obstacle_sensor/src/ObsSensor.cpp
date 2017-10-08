@@ -73,7 +73,6 @@ void ObsSensor::pubObstaclesPose(){
 		while(ros::ok() && (unsigned int)((unsigned char)tmp)!=0xbb){
 			while(ros::ok() && port->readPort(&tmp,1) < 1){
 			}
-			printf("%02x",(unsigned int)((unsigned char)tmp));
 		}
 		while(ros::ok() && port->readPort(&tmp,1) < 1){
 		}
@@ -92,11 +91,10 @@ void ObsSensor::pubObstaclesPose(){
 					}
 					data[nCount+i] = tmp;
 				}
-				for(int i=0;i<18;i++){
-				//	std::cout << std::hex;
-				//	std::cout << (unsigned int)data[i] << std::endl;
-					printf("%02x ",(unsigned int)data[i]);
+				for(int i=0;i<18;i+=2){
+					printf("%d ",data[i]*256+data[i+1]));
 				}
+				printf("\n");
 			}
 			else{
 				continue;	
