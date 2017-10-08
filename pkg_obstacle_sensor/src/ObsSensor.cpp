@@ -71,35 +71,26 @@ std::cout << std::hex;
 	while(ros::ok()){
 		char tmp=0xFF;
 		int nCount;
-		int n = port->readPort(&tmp,1);
-		if(n>0){
-	//		std::cout << (unsigned int)((unsigned char)tmp) << " ";
-		printf("%02x ",(unsigned int)((unsigned char)tmp));
-		}
-/*
+
 		while((unsigned int)((unsigned char)tmp)!=0xbb){
 			nCount = port->readPort(&tmp,1);
-//std::cout << "debug" << std::endl;
-std::cout << std::dec;
-if(nCount >0) std::cout << "drop: " <<(unsigned int)((unsigned char)tmp) << std::endl;
 		}
 		nCount = port->readPort(&tmp,1);
-		if(tmp == 0x01){
+		if((unsigned int)((unsigned char)tmp) == 0x01){
 			nCount = port->readPort(&tmp,1);
-			if(tmp == 0x12){
-char ttt[18];
-nCount = port->readPort(ttt,18);
-for(int i=0;i<nCount;i++){
-	std::cout << std::dec;
-	std::cout << (unsigned int)((unsigned char)ttt[i]) << " ";
-}
-std::cout << std::endl;
+			if((unsigned int)((unsigned char)tmp) == 0x12){
 				//valid seq
 				vector<uchar> data(18);
-				port->readPort(data,18);
+				nCount = port->readPort(data,18);
+				for(int i=0;i<18-nCount;i++){
+					while(port->readPort(&tmp,1) < 1 ){
+					}
+					data[nCount+i] = tmp;
+				}
 				for(int i=0;i<18;i++){
-					std::cout << std::hex;
-					std::cout << (int)data[i] << std::endl;
+				//	std::cout << std::hex;
+				//	std::cout << (unsigned int)data[i] << std::endl;
+					printf("%02x ",(unsigned int)data[i]);
 				}
 			}
 			else{
@@ -109,6 +100,6 @@ std::cout << std::endl;
 		else{
 			continue;
 		}
-*/
+
 	}
 }
