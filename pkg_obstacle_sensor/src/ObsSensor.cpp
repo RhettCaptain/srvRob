@@ -60,30 +60,35 @@ void ObsSensor::setSensorPose(int idx,const double x,const double y,const double
 void ObsSensor::start(int pBaud,int pDataBits,int pStopBits,char pParity){
 	port->openPort();
 	port->setPort(pBaud,pDataBits,pStopBits,pParity);
-//	port->setBlock(true);
+//	port->setBlock(false);
 //	port->setInMode('r');
 //	port->setOutMode('r');
 	pubObstaclesPose();
 }
 
 void ObsSensor::pubObstaclesPose(){
-std::cout << std::hex;
 	while(ros::ok()){
 		char tmp=0xFF;
-		int nCount;
 
-		while((unsigned int)((unsigned char)tmp)!=0xbb){
-			nCount = port->readPort(&tmp,1);
+		while(ros::ok() && (unsigned int)((unsigned char)tmp)!=0xbb){
+			while(ros::ok() && port->readPort(&tmp,1) < 1){
+			}
+			printf("%02x",(unsigned int)((unsigned char)tmp));
 		}
-		nCount = port->readPort(&tmp,1);
+		while(ros::ok() && port->readPort(&tmp,1) < 1){
+		}
 		if((unsigned int)((unsigned char)tmp) == 0x01){
-			nCount = port->readPort(&tmp,1);
+			while(ros::ok() && port->readPort(&tmp,1) < 1){
+			}
 			if((unsigned int)((unsigned char)tmp) == 0x12){
 				//valid seq
 				vector<uchar> data(18);
-				nCount = port->readPort(data,18);
+				int nCount = -1;
+				while(ros::ok() && nCount < 1){
+					nCount = port->readPort(data,18);
+				}
 				for(int i=0;i<18-nCount;i++){
-					while(port->readPort(&tmp,1) < 1 ){
+					while(ros::ok() && port->readPort(&tmp,1) < 1 ){
 					}
 					data[nCount+i] = tmp;
 				}
