@@ -16,6 +16,7 @@ private:
 	bool onOff[8];
 	geometry_msgs::Pose sensorPose[8];
 	int chosenCount;
+	double disThreshold;
 public:
 	ObsSensor(const char* pPortName,const char* pubToic="topic_obstacles_pose");
 	ObsSensor(const ObsSensor& os);
@@ -24,6 +25,7 @@ public:
 	void chooseSensor(unsigned char pOnOff);
 	void setSensorPose(int idx,const geometry_msgs::Pose& pPose);
 	void setSensorPose(int idx,const double x,const double y,const double th);
+	void setThreshold(double dis);
 	void start(int pBaud=115200,int pDataBits=8,int pStopBits=1,char pParity='n');	
 
 private:
