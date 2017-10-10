@@ -5,6 +5,8 @@
 #include "Socket.h"
 #include "geometry_msgs/PoseStamped.h"
 #include <string>
+#include <cstring>
+#include <tf/tf.h>
 
 class WebHandler{
 private:
@@ -17,6 +19,7 @@ public:
 
 private:
 	void pubGoal();
+	void motion();
 };
 
 

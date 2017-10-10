@@ -13,7 +13,9 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <fstream>
+#include <ros/ros.h>
 
+using namespace std;
 class SocketServer{
 private:
 	int serverFd;

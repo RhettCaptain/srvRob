@@ -19,11 +19,13 @@ SocketServer::SocketServer(const char* type){
 		throw("not support type");
 	}
 	clientsCount = 0;
+
 }
 
 SocketServer::SocketServer(int domain,int type,int protocol){
 	serverFd = socket(domain,type,protocol);
 	clientsCount = 0;
+
 }
 
 void SocketServer::setAddr(const char* fileName){
@@ -135,7 +137,7 @@ int SocketServer::readSock(std::string &buffer,int len,int clientIdx){
 int SocketServer::readline(char* buffer, int len, char eol,int clientIdx){
 	char ch=' ';
 	int idx=0;
-	while(ch!=eol){
+	while(ros::ok() && ch!=eol){
 		if(readSock(&ch,1,clientIdx)>0){
 			if(ch!=eol){
 				buffer[idx++] = ch;
@@ -302,9 +304,10 @@ int SocketClient::readSock(std::string &buffer, int len){
 }
 
 int SocketClient::readline(char* buffer,int len,char eol){
+	setBlock(false);
 	char ch=' ';
 	int idx=0;
-	while(ch!=eol){
+	while(ros::ok() && ch!=eol){
 		if(readSock(&ch,1)>0){
 			if(ch!=eol){
 				buffer[idx++] = ch;
@@ -369,3 +372,4 @@ bool SocketClient::close(int how){
 	}
 	return true;
 }
+
