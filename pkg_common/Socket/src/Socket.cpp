@@ -170,7 +170,7 @@ int SocketServer::recFile(const char* dstPath,int clientIdx){
 	ofstream fout;
 	fout.open(dstPath,ios_base::out|ios_base::trunc);
 	readline(fileContext,10000,EOF,clientIdx);
-	fileContext.erase(fileContext.end()-1);
+//	fileContext.erase(fileContext.end()-1);
 	fout << fileContext;
 	fout.close();
 	return fileContext.length();
@@ -340,7 +340,7 @@ int SocketClient::recFile(const char* dstPath){
 	ofstream fout;
 	fout.open(dstPath,ios_base::out|ios_base::trunc);
 	readline(fileContext,10000,EOF);
-	fileContext.erase(fileContext.end()-1);
+//	fileContext.erase(fileContext.end()-1);
 	fout << fileContext;
 	fout.close();
 	return fileContext.length();
