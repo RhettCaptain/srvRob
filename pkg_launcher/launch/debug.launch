@@ -8,5 +8,5 @@
 	<node pkg="pkg_pose" type="node_init_pose" name="node_init_pose"/> 
 	<node pkg="hector_mapping" type="hector_mapping" name="node_slam" output="screen" />
 	<node pkg="laser_filter" type="node_laser_filter" name="node_laser_filter" />
-
+	<node pkg="pkg_web_handler" type="node_web_handler" name="node_web_handler" />
 </launch>
