@@ -4,6 +4,7 @@
 #include "ros/ros.h"
 #include "Socket.h"
 #include "geometry_msgs/PoseStamped.h"
+#include "nav_msgs/Path.h"
 #include <string>
 #include <cstring>
 #include <tf/tf.h>
@@ -14,6 +15,7 @@ private:
 	SocketClient sock;
 	ros::NodeHandle nHandle;
 	ros::Publisher goalPub;
+	ros::Publisher pathPub;
 	ros::Subscriber poseSub;
 	geometry_msgs::PoseStamped robotPose;
 
@@ -26,6 +28,7 @@ private:
 	void motion();
 	void updateMap();
 	void getPose();
+	void pubPath();
 };
 
 

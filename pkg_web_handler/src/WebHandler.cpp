@@ -4,6 +4,7 @@ using std::string;
 
 WebHandler::WebHandler(const char* ip,unsigned short int port){
 	goalPub = nHandle.advertise<geometry_msgs::PoseStamped>("topic_goal",10);
+	pathPub = nHandle.advertise<nav_msgs::Path>("topic_global_path",10);
 	poseSub = nHandle.subscribe("topic_robot_pose",10,&WebHandler::onSubPose,this);
 	robotPose.pose.position.x = 0;
 	robotPose.pose.position.y = 0;
@@ -28,6 +29,9 @@ std::cout << "connected" << std::endl;
 			else if(cmd == "CMD_GET_POSE"){
 std::cout << "get pose " << std::endl;
 				getPose();
+			}
+			else if(cmd == "CMD_PUB_PATH"){
+				pubPath();
 			}
 		}
 		
@@ -84,4 +88,33 @@ void WebHandler::getPose(){
 	strPose += "\n";
 std::cout << strPose << std::endl;
 	sock.writeSock(strPose);
+}
+
+void WebHandler::pubPath(){
+	nav_msgs::Path path;
+	path.header.stamp = ros::Time::now();
+
+	char* content = new char[300];
+	char split = ';';
+	sock.readline(content,300);
+std::cout << content << std::endl;
+	int count;
+	double x,y,th;
+	char* tmp = strtok(content,&split);
+	count = atoi(tmp);
+	for(int i=0;i<count*3;i+=3){
+		tmp = strtok(NULL,&split);
+		x = atof(tmp);
+		tmp = strtok(NULL,&split);
+		y = atof(tmp);
+		tmp = strtok(NULL,&split);
+		th = atof(tmp);
+		geometry_msgs::PoseStamped pose;
+		pose.header.frame_id ="map";
+		pose.pose.position.x = x;
+		pose.pose.position.y = y;
+		pose.pose.orientation = tf::createQuaternionMsgFromYaw(th);
+		path.poses.push_back(pose);
+	}
+	pathPub.publish(path);
 }
