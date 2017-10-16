@@ -1,38 +1,29 @@
 #include "ObsSensor.h"
 
-using std::vector;
 
-ObsSensor::ObsSensor(const char* pPortName,const char* pubTopic){
+ObsSensor::ObsSensor(const char* pPortName,const char* pubTopic):minDis(0),maxDis(10){
 	port = new SerialPort(pPortName);
-	pub = nHandle.advertise<nav_msgs::Path>(pubTopic,10);
+	pub = nHandle.advertise<std_msgs::Bool>(pubTopic,10);
 	for(int i=0;i<8;i++){
-		onOff[i] = false;
+		disThreshold[i] = minDis;
 	}
-	chosenCount = 0;
-	disThreshold = 1;
 }
 
-ObsSensor::ObsSensor(const ObsSensor& os){
+ObsSensor::ObsSensor(const ObsSensor& os):minDis(0),maxDis(10){
 	port = new SerialPort("");
 	*port = *(os.port);
 	pub = os.pub;
 	for(int i=0;i<8;i++){
-		onOff[i] = os.onOff[i];
-		sensorPose[i] = os.sensorPose[i];
+		disThreshold[i] = os.disThreshold[i];
 	}
-	chosenCount = os.chosenCount;
-	disThreshold = os.disThreshold;
 }
 
 const ObsSensor& ObsSensor::operator=(const ObsSensor& os){
 	*port = *(os.port);
 	pub = os.pub;
 	for(int i=0;i<8;i++){
-		onOff[i] = os.onOff[i];
-		sensorPose[i] = os.sensorPose[i];
+		disThreshold[i] = os.disThreshold[i];
 	}
-	chosenCount = os.chosenCount;
-	disThreshold = os.disThreshold;
 }
 
 ObsSensor::~ObsSensor(){
@@ -40,28 +31,15 @@ ObsSensor::~ObsSensor(){
 	delete port;
 }
 
-void ObsSensor::chooseSensor(unsigned char pOnOff){
-	unsigned char flag = 0x80;
-	for(int i=0;i<8;i++){
-		if(pOnOff & (flag>>i)){
-			onOff[i] = true;
-			chosenCount++;
-		}
-	}
-}
-
-void ObsSensor::setSensorPose(int idx,const geometry_msgs::Pose& pPose){
-	sensorPose[idx] = pPose;
-}
-
-void ObsSensor::setSensorPose(int idx,const double x,const double y,const double th){
-	sensorPose[idx].position.x = x;
-	sensorPose[idx].position.y = y;
-	sensorPose[idx].orientation = tf::createQuaternionMsgFromYaw(th);
-}
-
-void ObsSensor::setThreshold(double dis){
-	disThreshold = dis;
+void ObsSensor::setThreshold(double thr1,double thr2,double thr3,double thr4,double thr5,double thr6,double thr7,double thr8){
+	disThreshold[0] = thr1;
+	disThreshold[1] = thr2;
+	disThreshold[2] = thr3;
+	disThreshold[3] = thr4;
+	disThreshold[4] = thr5;
+	disThreshold[5] = thr6;
+	disThreshold[6] = thr7;
+	disThreshold[7] = thr8;
 }
 
 void ObsSensor::start(int pBaud,int pDataBits,int pStopBits,char pParity){
@@ -70,10 +48,10 @@ void ObsSensor::start(int pBaud,int pDataBits,int pStopBits,char pParity){
 //	port->setBlock(false);
 //	port->setInMode('r');
 //	port->setOutMode('r');
-	pubObstaclesPose();
+	pubObstacleState();
 }
 
-void ObsSensor::pubObstaclesPose(){
+void ObsSensor::pubObstacleState(){
 	while(ros::ok()){
 		//read and analyse data
 		char tmp=0xFF;
@@ -104,26 +82,17 @@ void ObsSensor::pubObstaclesPose(){
 				}
 				printf("\n");
 				//pub information
-				nav_msgs::Path obstacles;
-				obstacles.header.stamp = ros::Time::now();
-				obstacles.header.frame_id = "base_link";
+				std_msgs::Bool obsExist;
+				obsExist.data = false;
 				for(int i=0;i<8;i++){
-					if(onOff[i]){
-						double dis = (data[i*2]*256+data[i*2+1])/100;		//xx m
-						if(dis==0 || dis >= disThreshold){
-							continue;
-						}
-						geometry_msgs::PoseStamped tmp;
-						tmp.header.stamp = ros::Time::now();
-						tmp.header.frame_id = "base_link";
-						double th = tf::getYaw(sensorPose[i].orientation);
-						tmp.pose.position.x = sensorPose[i].position.x + dis * cos(th);
-						tmp.pose.position.y = sensorPose[i].position.y + dis * sin(th);
-						tmp.pose.orientation = sensorPose[i].orientation;
-						obstacles.poses.push_back(tmp);
+					double dis = (data[i*2]*256+data[i*2+1])/100;		//xx m
+					if(dis < disThreshold[i]){
+						obsExist.data = true;
+						break;
 					}
+
 				}
-				pub.publish(obstacles);	
+				pub.publish(obsExist);	
 			}
 			else{
 				continue;	

@@ -5,6 +5,7 @@ using std::string;
 WebHandler::WebHandler(const char* ip,unsigned short int port){
 	goalPub = nHandle.advertise<geometry_msgs::PoseStamped>("topic_goal",10);
 	pathPub = nHandle.advertise<nav_msgs::Path>("topic_global_path",10);
+	motionPub = nHandle.advertise<std_msgs::String>("topic_motion_cmd",10);
 	poseSub = nHandle.subscribe("topic_robot_pose",10,&WebHandler::onSubPose,this);
 	robotPose.pose.position.x = 0;
 	robotPose.pose.position.y = 0;
@@ -66,7 +67,10 @@ std::cout << content << std::endl;
 void WebHandler::motion(){
 	string content;
 	sock.readline(content);
-std::cout << content << std::endl;
+//std::cout << content << std::endl;
+	std_msgs::String cmd;
+	cmd.data = content;
+	motionPub.publish(cmd);
 }
 
 void WebHandler::updateMap(){

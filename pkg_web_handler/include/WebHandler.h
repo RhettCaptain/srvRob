@@ -5,6 +5,7 @@
 #include "Socket.h"
 #include "geometry_msgs/PoseStamped.h"
 #include "nav_msgs/Path.h"
+#include "std_msgs/String.h"
 #include <string>
 #include <cstring>
 #include <tf/tf.h>
@@ -16,6 +17,7 @@ private:
 	ros::NodeHandle nHandle;
 	ros::Publisher goalPub;
 	ros::Publisher pathPub;
+	ros::Publisher motionPub;
 	ros::Subscriber poseSub;
 	geometry_msgs::PoseStamped robotPose;
 

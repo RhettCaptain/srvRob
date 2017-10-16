@@ -3,33 +3,26 @@
 
 #include "ros/ros.h"
 #include "SerialPort.h"
-#include "nav_msgs/Path.h"
-#include "geometry_msgs/Pose.h"
-#include "tf/tf.h"
-#include <vector>
+#include "std_msgs/Bool.h"
+
 
 class ObsSensor{
 private:
 	SerialPort* port;
 	ros::NodeHandle nHandle;
 	ros::Publisher pub;
-	bool onOff[8];
-	geometry_msgs::Pose sensorPose[8];
-	int chosenCount;
-	double disThreshold;
+	double disThreshold[8];
+	const double minDis,maxDis;
 public:
-	ObsSensor(const char* pPortName,const char* pubToic="topic_obstacles_pose");
+	ObsSensor(const char* pPortName,const char* pubToic="topic_obstacle");
 	ObsSensor(const ObsSensor& os);
 	const ObsSensor& operator=(const ObsSensor& os);
 	~ObsSensor();
-	void chooseSensor(unsigned char pOnOff);
-	void setSensorPose(int idx,const geometry_msgs::Pose& pPose);
-	void setSensorPose(int idx,const double x,const double y,const double th);
-	void setThreshold(double dis);
+	void setThreshold(double thr1=0,double thr2=0,double thr3=0,double thr4=0,double thr5=0,double thr6=0,double thr7=0,double thr8=0);
 	void start(int pBaud=115200,int pDataBits=8,int pStopBits=1,char pParity='n');	
 
 private:
-	void pubObstaclesPose();
+	void pubObstacleState();
 };
 
 #endif

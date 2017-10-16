@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(pkg_odometry)
+project(pkg_local_planner)
 
 ## Add support for C++11, supported in ROS Kinetic and newer
 # add_definitions(-std=c++11)
@@ -8,10 +8,10 @@ project(pkg_odometry)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  geometry_msgs
   nav_msgs
   roscpp
   std_msgs
-  tf
 )
 
 ## System dependencies are found with CMake's conventions
@@ -71,7 +71,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
-#   nav_msgs#   std_msgs
+#   geometry_msgs#   nav_msgs#   std_msgs
 # )
 
 ################################################
@@ -105,8 +105,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES pkg_odometry
-#  CATKIN_DEPENDS nav_msgs roscpp std_msgs
+#  LIBRARIES pkg_local_planner
+#  CATKIN_DEPENDS geometry_msgs nav_msgs roscpp std_msgs
 #  DEPENDS system_lib
 )
 
@@ -117,16 +117,14 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 # include_directories(include)
-SET(COMMON_PATH ../pkg_common)
 include_directories(
   ${catkin_INCLUDE_DIRS}
   include
-  ${COMMON_PATH}/tinyxml2/include
 )
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/pkg_odometry.cpp
+#   src/${PROJECT_NAME}/pkg_local_planner.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -137,7 +135,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-  add_executable(node_odometry src/Odometry.cpp src/main.cpp ${COMMON_PATH}/tinyxml2/src/tinyxml2.cpp)
+  add_executable(node_local_planner src/main.cpp src/LocalPlanner.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -150,7 +148,7 @@ include_directories(
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-  target_link_libraries(node_odometry
+  target_link_libraries(node_local_planner
     ${catkin_LIBRARIES}
   )
 
@@ -194,7 +192,7 @@ include_directories(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_pkg_odometry.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_pkg_local_planner.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
