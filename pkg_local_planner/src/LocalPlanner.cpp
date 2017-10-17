@@ -9,13 +9,13 @@ LocalPlanner::LocalPlanner(){
 
 	rate = 20;
 	obsExist = false;
-	taskFin = false;
+	taskFin = true;
 	isPause = false;
 	pathIdx = 0;	
 
-	basicLinearSpd = 0.3;
-	basicAngularSpd = 0.5;
-	disThreshold = 0.05;
+	basicLinearSpd = 0.25;
+	basicAngularSpd = 0.3;
+	disThreshold = 0.20;
 	angThreshold = 0.15;
 	angLimit = 1;
 }
@@ -43,6 +43,7 @@ void LocalPlanner::start(){
 }
 
 void LocalPlanner::onRecPath(const nav_msgs::Path::ConstPtr& msg){
+	taskFin = false;
 	path.clear();
 	int pCount = msg->poses.size();
 	for(int i=0;i<pCount;i++){
@@ -82,7 +83,7 @@ void LocalPlanner::pubVel(){
 	ros::Rate wait(rate);
 	while(ros::ok()){
 		ros::spinOnce();
-
+		
 		geometry_msgs::Twist vel;
 		if(isPause || taskFin){
 			vel.linear.x = 0;
@@ -90,8 +91,10 @@ void LocalPlanner::pubVel(){
 			vel.angular.z = 0;
 			velPub.publish(vel);
 			wait.sleep();
-		}	
-		else if(getDis(robotPose,path[pathIdx]) <= disThreshold){
+//std::cout << "Pause or fin" << std::endl;
+		}
+		else if(path.size() > 0 && getDis(robotPose,path[pathIdx]) <= disThreshold){
+//std::cout << "in goal" << std::endl;
 			//next goal and task finish rule
 			if(pathIdx == path.size()-1){
 				//task finish
@@ -123,6 +126,7 @@ void LocalPlanner::pubVel(){
 			
 		}
 		else if(obsExist){
+//std::cout << "obstacle" << std::endl;
 			//avoid obstacle strategy
 			while(ros::ok() && obsExist){
 				ros::spinOnce();
@@ -162,6 +166,7 @@ void LocalPlanner::pubVel(){
 					vel.linear.y = 0;
 					vel.angular.z = spinDir * basicAngularSpd;
 					velPub.publish(vel);
+//std::cout << "adjust" << std::endl;
 					wait.sleep();
 				}
 			}
@@ -171,6 +176,7 @@ void LocalPlanner::pubVel(){
 				vel.angular.z = spinDir * basicAngularSpd;
 				velPub.publish(vel);
 				wait.sleep();
+//std::cout <<"normal" << std::endl;
 			}
 		}
 

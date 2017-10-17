@@ -1,6 +1,6 @@
 <launch>
 	<node pkg="joy" name="joy_node" type="joy_node"/>
-	<node pkg="pkg_joystick" name="node_joystick" type="node_joystick"/>
+<!--	<node pkg="pkg_joystick" name="node_joystick" type="node_joystick"/> -->
 	<node pkg="pkg_base_controller" name="node_base_controller" type="node_base_controller"/>
 	<node pkg="pkg_odometry" name="node_odometry" type="node_odometry" />
 	<node pkg="tf" type="static_transform_publisher" name="base_link2laser_tf" args="0 0 0 0 0 0 1 base_link laser_frame 20" />
@@ -10,4 +10,5 @@
 	<node pkg="laser_filter" type="node_laser_filter" name="node_laser_filter" />
 	<node pkg="pkg_web_handler" type="node_web_handler" name="node_web_handler" />
 	<node pkg="pkg_pose" type="node_pub_pose" name="node_pub_pose" />
+	<node pkg="pkg_local_planner" type="node_local_planner" name="node_local_planner" output="screen"/> 
 </launch>
