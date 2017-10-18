@@ -109,7 +109,7 @@ void LocalPlanner::pubVel(){
 					vel.angular.z = spinDir * basicAngularSpd;
 					velPub.publish(vel);
 					wait.sleep();
-std::cout << "finishing " << biasAng << "," << robotPose.th << std::endl;
+std::cout << biasAng << "," << robotPose.th << std::endl;
 				}
 				vel.linear.x = 0;
 				vel.linear.y = 0;
@@ -158,7 +158,6 @@ std::cout << "finishing " << biasAng << "," << robotPose.th << std::endl;
 			//control strategy	
 			double biasAng = getAng(robotPose,path[pathIdx]) - robotPose.th;
 			int spinDir = biasAng / fabs(biasAng);
-std::cout << "control " << biasAng << "," << robotPose.th << std::endl;
 			if(fabs(biasAng) > angLimit){
 				while(ros::ok() && fabs(biasAng) > angThreshold){
 					ros::spinOnce();
