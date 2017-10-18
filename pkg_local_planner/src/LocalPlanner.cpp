@@ -14,10 +14,10 @@ LocalPlanner::LocalPlanner(){
 	pathIdx = 0;	
 
 	basicLinearSpd = 0.25;
-	basicAngularSpd = 0.3;
-	disThreshold = 0.20;
+	basicAngularSpd = 0.1;
+	disThreshold = 0.05;
 	angThreshold = 0.15;
-	angLimit = 1;
+	angLimit = 0.5;
 }
 
 void LocalPlanner::setRate(int pRate){
@@ -98,17 +98,18 @@ void LocalPlanner::pubVel(){
 			//next goal and task finish rule
 			if(pathIdx == path.size()-1){
 				//task finish
-				double biasAng = getAng(robotPose,path[pathIdx]);
+				double biasAng = path[pathIdx].th - robotPose.th;
 				int spinDir = biasAng / fabs(biasAng);
 				while(ros::ok() && fabs(biasAng) > angThreshold){
 					ros::spinOnce();
-					biasAng = getAng(robotPose,path[pathIdx]);
+					biasAng = path[pathIdx].th - robotPose.th;
 					spinDir = biasAng / fabs(biasAng);
 					vel.linear.x = 0;
 					vel.linear.y = 0;
 					vel.angular.z = spinDir * basicAngularSpd;
 					velPub.publish(vel);
 					wait.sleep();
+std::cout << biasAng << "," << robotPose.th << std::endl;
 				}
 				vel.linear.x = 0;
 				vel.linear.y = 0;
@@ -155,12 +156,12 @@ void LocalPlanner::pubVel(){
 		}
 		else{
 			//control strategy	
-			double biasAng = getAng(robotPose,path[pathIdx]);
+			double biasAng = getAng(robotPose,path[pathIdx]) - robotPose.th;
 			int spinDir = biasAng / fabs(biasAng);
 			if(fabs(biasAng) > angLimit){
 				while(ros::ok() && fabs(biasAng) > angThreshold){
 					ros::spinOnce();
-					biasAng = getAng(robotPose,path[pathIdx]);
+					biasAng = getAng(robotPose,path[pathIdx]) - robotPose.th;
 					spinDir = biasAng / fabs(biasAng);
 					vel.linear.x = 0;
 					vel.linear.y = 0;
