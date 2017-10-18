@@ -158,7 +158,7 @@ std::cout << "finishing " << biasAng << "," << robotPose.th << std::endl;
 			//control strategy	
 			double biasAng = getAng(robotPose,path[pathIdx]) - robotPose.th;
 			int spinDir = biasAng / fabs(biasAng);
-std::cout << "control " << biasAng << "," << robotPose.th << std::endl;
+std::cout << "control goal:" << biasAng+robotPose.th << " robotPose:"<<robotPose.th << " biasAng:" << biasAng  << std::endl;
 			if(fabs(biasAng) > angLimit){
 				while(ros::ok() && fabs(biasAng) > angThreshold){
 					ros::spinOnce();
@@ -168,7 +168,7 @@ std::cout << "control " << biasAng << "," << robotPose.th << std::endl;
 					vel.linear.y = 0;
 					vel.angular.z = spinDir * basicAngularSpd;
 					velPub.publish(vel);
-//std::cout << "adjust" << std::endl;
+std::cout << "adjust:" << biasAng << std::endl;
 					wait.sleep();
 				}
 			}
