@@ -1,6 +1,7 @@
 #include "WebHandler.h"
 
 using std::string;
+using namespace tinyxml2;
 
 WebHandler::WebHandler(const char* ip,unsigned short int port){
 	goalPub = nHandle.advertise<geometry_msgs::PoseStamped>("topic_goal",10);
@@ -33,6 +34,9 @@ std::cout << "get pose " << std::endl;
 			}
 			else if(cmd == "CMD_PUB_PATH"){
 				pubPath();
+			}
+			else if(cmd == "CMD_UPDATE_INIT_POSE"){
+				updateInitPose();
 			}
 		}
 		
@@ -121,4 +125,33 @@ std::cout << content << std::endl;
 		path.poses.push_back(pose);
 	}
 	pathPub.publish(path);
+}
+
+void WebHandler::updateInitPose(){
+	char* content = new char[30];
+	char split = ';';
+	sock.readline(content,30);
+std::cout << content << std::endl;
+	string x,y,th;
+	char* tmp = strtok(content,&split);
+	x = tmp;
+	tmp = strtok(NULL,&split);
+	y = tmp;
+	tmp = strtok(NULL,&split);
+	th = tmp;
+	delete[] content;
+	
+	char* xmlPath = new char[100];
+        strcpy(xmlPath,"/home/");
+        strcat(xmlPath, getlogin());
+        strcat(xmlPath, "/srv_rob_conf/initPose.xml");
+
+	XMLDocument doc;
+        int res = doc.LoadFile(xmlPath);
+        XMLElement* root = doc.RootElement();
+	root->SetAttribute("x",x.c_str());
+	root->SetAttribute("y",y.c_str());
+	root->SetAttribute("th",th.c_str());
+	doc.SaveFile(xmlPath);
+	
 }

@@ -120,6 +120,7 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
   include
   ${COMMON_PATH}/Socket/include
+  ${COMMON_PATH}/tinyxml2/include
 )
 
 ## Declare a C++ library
@@ -135,7 +136,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
- add_executable(node_web_handler src/main.cpp src/WebHandler.cpp ${COMMON_PATH}/Socket/src/Socket.cpp)
+ add_executable(node_web_handler src/main.cpp src/WebHandler.cpp ${COMMON_PATH}/Socket/src/Socket.cpp ${COMMON_PATH}/tinyxml2/src/tinyxml2.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the

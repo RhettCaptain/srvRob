@@ -22,9 +22,32 @@ bool loadInitPose(geometry_msgs::PoseWithCovarianceStamped& initPose,char* xmlPa
 	return true;
 }
 
+void updateInitPose(const geometry_msgs::PoseStamped::ConstPtr& msg){
+	char* xmlPath = new char[100];
+        strcpy(xmlPath,"/home/");
+        strcat(xmlPath, getlogin());
+        strcat(xmlPath, "/srv_rob_conf/initPose.xml");
+	
+	XMLDocument doc;
+        int res = doc.LoadFile(xmlPath);
+    
+        XMLElement* root = doc.RootElement();
+	char tmp[20];
+	sprintf(tmp,"%f",msg->pose.position.x);
+	root->SetAttribute("x",tmp);
+	sprintf(tmp,"%f",msg->pose.position.y);
+	root->SetAttribute("y",tmp);
+	sprintf(tmp,"%f",tf::getYaw(msg->pose.orientation));
+	root->SetAttribute("th",tmp);
+        doc.SaveFile(xmlPath);
+
+}
+
 int main(int argc,char** argv){
 	ros::init(argc,argv,"node_init_pose");
 	ros::NodeHandle nHandle;
+
+	//load and pub
 	ros::Publisher initPosePub = nHandle.advertise<geometry_msgs::PoseWithCovarianceStamped>("initialpose",10);
 	ros::Publisher resetPub = nHandle.advertise<std_msgs::String>("syscommand",1);
 	geometry_msgs::PoseWithCovarianceStamped initPoseMsg;
@@ -45,4 +68,9 @@ int main(int argc,char** argv){
 	} 
 	initPosePub.publish(initPoseMsg);
 	resetPub.publish(resetMsg);
+
+	//listen and update
+	usleep(2000*1000);
+	ros::Subscriber poseSub = nHandle.subscribe("topic_robot_pose",10,updateInitPose);
+	ros::spin();
 }

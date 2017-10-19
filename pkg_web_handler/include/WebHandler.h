@@ -6,6 +6,7 @@
 #include "geometry_msgs/PoseStamped.h"
 #include "nav_msgs/Path.h"
 #include "std_msgs/String.h"
+#include "tinyxml2.h"
 #include <string>
 #include <cstring>
 #include <tf/tf.h>
@@ -31,6 +32,7 @@ private:
 	void updateMap();
 	void getPose();
 	void pubPath();
+	void updateInitPose();
 };
 
 
