@@ -7,6 +7,8 @@ LocalPlanner::LocalPlanner(){
 	poseSub = nHandle.subscribe("topic_robot_pose",10,&LocalPlanner::onRecPose,this);
 	velPub = nHandle.advertise<geometry_msgs::Twist>("cmd_vel",10);
 
+	enable = true;
+
 	rate = 20;
 	obsExist = false;
 	taskFin = true;
@@ -68,8 +70,15 @@ void LocalPlanner::onRecCmd(const std_msgs::String::ConstPtr& msg){
 	}
 	else if(msg->data == "stop"){
 		taskFin = true;
+std::cout << "########################################" << std::endl;
 		path.clear();
 		pathIdx = 0;
+	}
+	else if(msg->data == "joystickMode" || msg->data == "softwareMode"){
+		enable = false;
+	}
+	else if(msg->data == "autoMode"){
+		enable = true;
 	}
 }
 
@@ -85,7 +94,11 @@ void LocalPlanner::pubVel(){
 		ros::spinOnce();
 		
 		geometry_msgs::Twist vel;
-		if(isPause || taskFin){
+		if(!enable){
+			wait.sleep();
+			continue;
+		}
+		else if(isPause || taskFin){
 			vel.linear.x = 0;
 			vel.linear.y = 0;
 			vel.angular.z = 0;
@@ -98,11 +111,22 @@ void LocalPlanner::pubVel(){
 			//next goal and task finish rule
 			if(pathIdx == path.size()-1){
 				//task finish
-				double biasAng = path[pathIdx].th - robotPose.th;
+				double biasAng = getBiasAng(robotPose.th,path[pathIdx].th);
 				int spinDir = biasAng / fabs(biasAng);
 				while(ros::ok() && fabs(biasAng) > angThreshold){
 					ros::spinOnce();
-					biasAng = path[pathIdx].th - robotPose.th;
+					if(isPause){
+						vel.linear.x = 0;
+						vel.linear.y = 0;
+						vel.angular.z = 0;
+						velPub.publish(vel);
+						wait.sleep();
+						continue;
+					}
+					if(taskFin){
+						break;
+					}
+					biasAng = getBiasAng(robotPose.th,path[pathIdx].th);
 					spinDir = biasAng / fabs(biasAng);
 					vel.linear.x = 0;
 					vel.linear.y = 0;
@@ -131,6 +155,17 @@ std::cout << "finishing " << biasAng << "," << robotPose.th << std::endl;
 			//avoid obstacle strategy
 			while(ros::ok() && obsExist){
 				ros::spinOnce();
+				if(isPause){
+					vel.linear.x = 0;
+					vel.linear.y = 0;
+					vel.angular.z = 0;
+					velPub.publish(vel);
+					wait.sleep();
+					continue;
+				}
+				if(taskFin){
+					break;
+				}
 				vel.linear.x = 0;
 				vel.linear.y = 0;
 				vel.angular.z = basicAngularSpd;
@@ -140,6 +175,17 @@ std::cout << "finishing " << biasAng << "," << robotPose.th << std::endl;
 			int keepTimes = 20;
 			for(int i=0;i<keepTimes;i++){
 				ros::spinOnce();
+				if(isPause){
+					vel.linear.x = 0;
+					vel.linear.y = 0;
+					vel.angular.z = 0;
+					velPub.publish(vel);
+					wait.sleep();
+					continue;
+				}
+				if(taskFin){
+					break;
+				}
 				if(obsExist){
 					vel.linear.x = 0;
 					vel.linear.y = 0;
@@ -156,13 +202,24 @@ std::cout << "finishing " << biasAng << "," << robotPose.th << std::endl;
 		}
 		else{
 			//control strategy	
-			double biasAng = getAng(robotPose,path[pathIdx]) - robotPose.th;
+			double biasAng = getBiasAng(robotPose.th,getAng(robotPose,path[pathIdx]));
 			int spinDir = biasAng / fabs(biasAng);
 std::cout << "control goal:" << biasAng+robotPose.th << " robotPose:"<<robotPose.th << " biasAng:" << biasAng  << std::endl;
 			if(fabs(biasAng) > angLimit){
 				while(ros::ok() && fabs(biasAng) > angThreshold){
 					ros::spinOnce();
-					biasAng = getAng(robotPose,path[pathIdx]) - robotPose.th;
+					if(isPause){
+						vel.linear.x = 0;
+						vel.linear.y = 0;
+						vel.angular.z = 0;
+						velPub.publish(vel);
+						wait.sleep();
+						continue;
+					}
+					if(taskFin){
+						break;
+					}
+					biasAng = getBiasAng(robotPose.th,getAng(robotPose,path[pathIdx]));
 					spinDir = biasAng / fabs(biasAng);
 					vel.linear.x = 0;
 					vel.linear.y = 0;
@@ -208,3 +265,13 @@ double LocalPlanner::getAng(const Pose& p1,const Pose& p2){
 	return angle;
 }
 
+double LocalPlanner::getBiasAng(const double robotAng,const double goalAng){
+	double bias = goalAng - robotAng;
+	if(bias > M_PI){
+		bias -= 2*M_PI;
+	}
+	else if(bias <= -M_PI){
+		bias += 2*M_PI;
+	}
+	return bias;
+}

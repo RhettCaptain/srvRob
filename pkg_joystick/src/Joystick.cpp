@@ -1,8 +1,10 @@
 #include "Joystick.h"
 
 Joystick::Joystick(){
-	sub = nHandle.subscribe("joy",10,&Joystick::updateState,this);
+	joySub = nHandle.subscribe("joy",10,&Joystick::updateState,this);
+	motionSub = nHandle.subscribe("topic_motion_cmd",10,&Joystick::enableSwitch,this);
 	pub = nHandle.advertise<geometry_msgs::Twist>("cmd_vel",10);
+	enable = true;
 	state = STOP;
 	speed = NOR_SPD;
 	leftIdx1 = 0;
@@ -15,8 +17,10 @@ Joystick::Joystick(){
 	pubRate = 100;
 }
 Joystick::Joystick(int axesLeftIdx,int axesForIdx,int btnSpdUpIdx,int btnSpdDownIdx){
-	sub = nHandle.subscribe("joy",10,&Joystick::updateState,this);
+	joySub = nHandle.subscribe("joy",10,&Joystick::updateState,this);
+	motionSub = nHandle.subscribe("topic_motion_cmd",10,&Joystick::enableSwitch,this);
 	pub = nHandle.advertise<geometry_msgs::Twist>("cmd_vel",10);
+	enable = true;
 	state = STOP;
 	speed = NOR_SPD;
 	leftIdx1 = axesLeftIdx;
@@ -29,8 +33,10 @@ Joystick::Joystick(int axesLeftIdx,int axesForIdx,int btnSpdUpIdx,int btnSpdDown
 	pubRate = 100;
 }
 Joystick::Joystick(int axesLeftIdx1,int axesLeftIdx2,int axesForIdx1, int axesForIdx2, int btnSpdUpIdx, int btnSpdDownIdx){
-	sub = nHandle.subscribe("joy",10,&Joystick::updateState,this);
+	joySub = nHandle.subscribe("joy",10,&Joystick::updateState,this);
+	motionSub = nHandle.subscribe("topic_motion_cmd",10,&Joystick::enableSwitch,this);
 	pub = nHandle.advertise<geometry_msgs::Twist>("cmd_vel",10);
+	enable = true;
 	state = STOP;
 	speed = NOR_SPD;
 	leftIdx1 = axesLeftIdx1;
@@ -118,7 +124,19 @@ void Joystick::updateState(const sensor_msgs::Joy::ConstPtr& msg){
 	}
 }
 
+void Joystick::enableSwitch(const std_msgs::String::ConstPtr& msg){
+	if(msg->data == "autoMode" || msg->data == "softwareMode"){
+		enable = false;
+	}
+	if(msg->data == "joystickMode"){
+		enable = true;
+	}
+}
+
 void Joystick::sendCmdVel(){
+	if(!enable){
+		return;
+	}
 	geometry_msgs::Twist msgCmdVel;	
 	msgCmdVel.linear.x=msgCmdVel.linear.y=msgCmdVel.linear.z=0;
 	msgCmdVel.angular.x=msgCmdVel.angular.y=msgCmdVel.angular.z=0;
@@ -191,4 +209,8 @@ void Joystick::setAngSpd(double s1,double s2,double s3){
 
 void Joystick::setPubRate(int rate){
 	pubRate = rate;
+}
+
+void Joystick::setEnable(bool b){
+	enable = b;
 }

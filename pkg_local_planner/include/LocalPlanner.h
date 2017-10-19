@@ -29,6 +29,8 @@ private:
 	ros::Subscriber cmdSub;
 	ros::Subscriber poseSub;
 	ros::Publisher velPub;
+
+	bool enable;
 	
 	int rate;
 	bool obsExist;
@@ -59,6 +61,7 @@ private:
 	
 	double getDis(const Pose& p1,const Pose& p2);
 	double getAng(const Pose& p1,const Pose& p2);
+	double getBiasAng(const double robotAng,const double goalAng);
 };
 
 #endif

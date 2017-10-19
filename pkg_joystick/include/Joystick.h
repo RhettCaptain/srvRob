@@ -1,16 +1,19 @@
 #include "ros/ros.h"
 #include "sensor_msgs/Joy.h"
 #include "geometry_msgs/Twist.h"
+#include "std_msgs/String.h"
 #include <algorithm>
 
 class Joystick{
 private:
 	ros::NodeHandle nHandle;
-	ros::Subscriber sub;
+	ros::Subscriber joySub;
+	ros::Subscriber motionSub;
 	ros::Publisher pub;
 	enum State{FORWARD,BACK,LEFT,RIGHT,FOR_LEFT,FOR_RIGHT,BACK_LEFT,BACK_RIGHT,STOP} state;
 	enum Speed{LOW_SPD,NOR_SPD,HIGH_SPD} speed;
 
+	bool enable;
 	int leftIdx1,leftIdx2;
 	int forIdx1,forIdx2;
 	int spdUpIdx,spdDownIdx;
@@ -21,6 +24,7 @@ private:
 	int pubRate;
 
 	void updateState(const sensor_msgs::Joy::ConstPtr& msg);
+	void enableSwitch(const std_msgs::String::ConstPtr& msg);
 	void sendCmdVel();
 public:
 	Joystick();
@@ -34,4 +38,5 @@ public:
 	void setAngSpd(double s1,double s2, double s3);
 
 	void setPubRate(int rate);
+	void setEnable(bool b);
 };
