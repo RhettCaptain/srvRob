@@ -7,6 +7,7 @@ LaserFilter::LaserFilter(const char*sTopic,const char* pTopic):subTopic(sTopic),
 	scanPub = nHandle.advertise<sensor_msgs::LaserScan>(pubTopic,10);
 	isAngleFiltered = false;
 	isRangeFiltered = false;
+	isReversed = false;
 	minAngle = 0;
 	maxAngle = 0;
 	minRange = 0;
@@ -25,6 +26,10 @@ void LaserFilter::setRangeFilter(double minRan,double maxRan){
 	maxRange = maxRan;
 	isRangeFiltered = true;
 	INF = maxRange+1;
+}
+
+void LaserFilter::reverse(){
+	isReversed = true;
 }
 
 void LaserFilter::start(){
@@ -49,6 +54,9 @@ void LaserFilter::onRecScan(const sensor_msgs::LaserScan::ConstPtr& rawScan){
 	if(isRangeFiltered){
 		filScan.range_min = minRange;
 		filScan.range_max = maxRange;
+	}
+	if(isReversed){
+		filScan.angle_increment = -filScan.angle_increment;
 	}
 	scanPub.publish(filScan);
 }

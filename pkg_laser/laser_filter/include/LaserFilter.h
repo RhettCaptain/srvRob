@@ -11,6 +11,7 @@ private:
 	const char* pubTopic;
 	bool isAngleFiltered;
 	bool isRangeFiltered;
+	bool isReversed;
 	double minAngle,maxAngle;
 	double minRange,maxRange;
 	ros::Subscriber scanSub;
@@ -20,6 +21,7 @@ public:
 	LaserFilter(const char* sTopic,const char* pTopic);
 	void setAngleFilter(double minAng,double maxAng);
 	void setRangeFilter(double minRan,double maxRan);
+	void reverse();
 	void start();
 private:
 	void onRecScan(const sensor_msgs::LaserScan::ConstPtr& rawScan);

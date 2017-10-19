@@ -3,7 +3,7 @@
 <!--	<node pkg="pkg_joystick" name="node_joystick" type="node_joystick"/> -->
 	<node pkg="pkg_base_controller" name="node_base_controller" type="node_base_controller"/>
 	<node pkg="pkg_odometry" name="node_odometry" type="node_odometry" />
-	<node pkg="tf" type="static_transform_publisher" name="base_link2laser_tf" args="-0.15 0.07 0 0 0 0 1 base_link laser_frame 20" />
+	<node pkg="tf" type="static_transform_publisher" name="base_link2laser_tf" args="-0.15 0 0 0 0 0 1 base_link laser_frame 20" />
 	<node pkg="rplidar_ros" type="rplidarNode" name="node_laser"/>
 	<node pkg="pkg_pose" type="node_init_pose" name="node_init_pose"/> 
 	<node pkg="hector_mapping" type="hector_mapping" name="node_slam" output="screen" />
