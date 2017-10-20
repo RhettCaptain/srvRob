@@ -8,6 +8,8 @@ WebHandler::WebHandler(const char* ip,unsigned short int port){
 	pathPub = nHandle.advertise<nav_msgs::Path>("topic_global_path",10);
 	motionPub = nHandle.advertise<std_msgs::String>("topic_motion_cmd",10);
 	poseSub = nHandle.subscribe("topic_robot_pose",10,&WebHandler::onSubPose,this);
+	initPosePub = nHandle.advertise<geometry_msgs::PoseWithCovarianceStamped>("initialpose",10);
+        resetPub = nHandle.advertise<std_msgs::String>("syscommand",1);
 	robotPose.pose.position.x = 0;
 	robotPose.pose.position.y = 0;
 	robotPose.pose.orientation = tf::createQuaternionMsgFromYaw(0);
@@ -29,7 +31,6 @@ std::cout << "connected" << std::endl;
 				updateMap();
 			}
 			else if(cmd == "CMD_GET_POSE"){
-std::cout << "get pose " << std::endl;
 				getPose();
 			}
 			else if(cmd == "CMD_PUB_PATH"){
@@ -50,7 +51,7 @@ void WebHandler::pubGoal(){
 	char* content = new char[30];
 	char split = ';';
 	sock.readline(content,30);
-std::cout << content << std::endl;
+//std::cout << content << std::endl;
 	double x,y,th;
 	char* tmp = strtok(content,&split);
 	x = atof(tmp);
@@ -85,7 +86,7 @@ void WebHandler::updateMap(){
 //string test;
 //sock.readSock(test);
 	sock.recFile(mapPath);
-std::cout << "ok" << std::endl;
+//std::cout << "ok" << std::endl;
 }
 
 void WebHandler::getPose(){
@@ -94,7 +95,7 @@ void WebHandler::getPose(){
 	ss << robotPose.pose.position.x << ";" << robotPose.pose.position.y << ";" << tf::getYaw(robotPose.pose.orientation) << ";";
 	ss >> strPose;
 	strPose += "\n";
-std::cout << strPose << std::endl;
+//std::cout << strPose << std::endl;
 	sock.writeSock(strPose);
 }
 
@@ -105,7 +106,7 @@ void WebHandler::pubPath(){
 	char* content = new char[300];
 	char split = ';';
 	sock.readline(content,300);
-std::cout << content << std::endl;
+//std::cout << content << std::endl;
 	int count;
 	double x,y,th;
 	char* tmp = strtok(content,&split);
@@ -140,7 +141,7 @@ std::cout << content << std::endl;
 	tmp = strtok(NULL,&split);
 	th = tmp;
 	delete[] content;
-	
+/*	
 	char* xmlPath = new char[100];
         strcpy(xmlPath,"/home/");
         strcat(xmlPath, getlogin());
@@ -153,5 +154,17 @@ std::cout << content << std::endl;
 	root->SetAttribute("y",y.c_str());
 	root->SetAttribute("th",th.c_str());
 	doc.SaveFile(xmlPath);
-	
+*/
+	geometry_msgs::PoseWithCovarianceStamped initPoseMsg;
+        std_msgs::String resetMsg;
+	initPoseMsg.header.frame_id = "map";
+	initPoseMsg.pose.pose.position.x = atof(x.c_str());
+        initPoseMsg.pose.pose.position.y = atof(y.c_str());
+        initPoseMsg.pose.pose.orientation = tf::createQuaternionMsgFromYaw(atof(th.c_str()));
+
+	resetMsg.data = "reset";
+	initPosePub.publish(initPoseMsg);
+        resetPub.publish(resetMsg);
 }
+
+

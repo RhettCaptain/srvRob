@@ -4,6 +4,7 @@
 #include "ros/ros.h"
 #include "Socket.h"
 #include "geometry_msgs/PoseStamped.h"
+#include "geometry_msgs/PoseWithCovarianceStamped.h"
 #include "nav_msgs/Path.h"
 #include "std_msgs/String.h"
 #include "tinyxml2.h"
@@ -19,6 +20,8 @@ private:
 	ros::Publisher goalPub;
 	ros::Publisher pathPub;
 	ros::Publisher motionPub;
+	ros::Publisher initPosePub;
+	ros::Publisher resetPub;
 	ros::Subscriber poseSub;
 	geometry_msgs::PoseStamped robotPose;
 
