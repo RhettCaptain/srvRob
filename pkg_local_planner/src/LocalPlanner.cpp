@@ -17,9 +17,12 @@ LocalPlanner::LocalPlanner(){
 
 	basicLinearSpd = 0.25;
 	basicAngularSpd = 0.1;
+	slowLinearSpd = 0.1;
+	slowDisThreshold = 0.15;
 	disThreshold = 0.05;
 	angThreshold = 0.15;
 	angLimit = 0.5;
+	slowAngLimit = 0.3;
 }
 
 void LocalPlanner::setRate(int pRate){
@@ -93,6 +96,17 @@ void LocalPlanner::pubVel(){
 	while(ros::ok()){
 		ros::spinOnce();
 		
+		double tempLinSpd,tempAngSpd,tempAngLimit;
+		if(path.size() > 0 && getDis(robotPose,path[pathIdx]) <= slowDisThreshold){
+			tempLinSpd = slowLinearSpd;
+			tempAngSpd = basicAngularSpd;
+			tempAngLimit = slowAngLimit;
+		}
+		else{
+			tempLinSpd = basicLinearSpd;
+			tempAngSpd = basicAngularSpd;
+			tempAngLimit = angLimit;
+		}
 		geometry_msgs::Twist vel;
 		if(!enable){
 			wait.sleep();
@@ -130,7 +144,7 @@ void LocalPlanner::pubVel(){
 					spinDir = biasAng / fabs(biasAng);
 					vel.linear.x = 0;
 					vel.linear.y = 0;
-					vel.angular.z = spinDir * basicAngularSpd;
+					vel.angular.z = spinDir * tempAngSpd;
 					velPub.publish(vel);
 					wait.sleep();
 std::cout << "finishing " << biasAng << "," << robotPose.th << std::endl;
@@ -168,7 +182,7 @@ std::cout << "finishing " << biasAng << "," << robotPose.th << std::endl;
 				}
 				vel.linear.x = 0;
 				vel.linear.y = 0;
-				vel.angular.z = basicAngularSpd;
+				vel.angular.z = tempAngSpd;
 				velPub.publish(vel);
 				wait.sleep();
 			}
@@ -189,11 +203,11 @@ std::cout << "finishing " << biasAng << "," << robotPose.th << std::endl;
 				if(obsExist){
 					vel.linear.x = 0;
 					vel.linear.y = 0;
-					vel.angular.z = basicAngularSpd;
+					vel.angular.z = tempAngSpd;
 					velPub.publish(vel);
 					break;
 				}
-				vel.linear.x = basicLinearSpd;
+				vel.linear.x = tempLinSpd;
 				vel.linear.y = 0;
 				vel.angular.z = 0;
 				velPub.publish(vel);
@@ -223,16 +237,16 @@ std::cout << "control goal:" << biasAng+robotPose.th << " robotPose:"<<robotPose
 					spinDir = biasAng / fabs(biasAng);
 					vel.linear.x = 0;
 					vel.linear.y = 0;
-					vel.angular.z = spinDir * basicAngularSpd;
+					vel.angular.z = spinDir * tempAngSpd;
 					velPub.publish(vel);
 std::cout << "adjust:" << biasAng << std::endl;
 					wait.sleep();
 				}
 			}
 			else{
-				vel.linear.x = basicLinearSpd;
+				vel.linear.x = tempLinSpd;
 				vel.linear.y = 0;
-				vel.angular.z = spinDir * basicAngularSpd;
+				vel.angular.z = spinDir *  tempAngSpd;
 				velPub.publish(vel);
 				wait.sleep();
 //std::cout <<"normal" << std::endl;

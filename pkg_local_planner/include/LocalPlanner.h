@@ -41,8 +41,10 @@ private:
 	int pathIdx;
 
 	double basicLinearSpd,basicAngularSpd;
-	double disThreshold, angThreshold;
-	double angLimit;
+	double slowLinearSpd;
+	double slowDisThreshold;	//slow down when in threshold
+	double disThreshold, angThreshold;	//stop when in threshold 
+	double angLimit,slowAngLimit;	//turn at situ when over angle limit
  
 public:
 	LocalPlanner();
