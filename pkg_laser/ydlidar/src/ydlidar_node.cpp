@@ -120,9 +120,9 @@ int main(int argc, char * argv[]) {
     const char * model;
 
     ros::NodeHandle nh;
-    ros::Publisher scan_pub = nh.advertise<sensor_msgs::LaserScan>("scan", 1000);
+    ros::Publisher scan_pub = nh.advertise<sensor_msgs::LaserScan>("topic_raw_scan", 1000);
     ros::NodeHandle nh_private("~");
-    nh_private.param<std::string>("port", port, "/dev/ttyACM0"); 
+    nh_private.param<std::string>("port", port, "/dev/ttyUSB0"); 
     nh_private.param<int>("baudrate", baudrate, 128000); 
     nh_private.param<std::string>("frame_id", frame_id, "laser_frame");
     nh_private.param<bool>("angle_fixed", angle_fixed, "true");
