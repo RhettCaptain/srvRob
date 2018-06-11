@@ -15,14 +15,14 @@ LocalPlanner::LocalPlanner(){
 	isPause = false;
 	pathIdx = 0;	
 
-	basicLinearSpd = 0.25;
-	basicAngularSpd = 0.1;
-	slowLinearSpd = 0.1;
-	slowDisThreshold = 0.15;
-	disThreshold = 0.05;
-	angThreshold = 0.15;
-	angLimit = 0.5;
-	slowAngLimit = 0.3;
+	basicLinearSpd = 0.05;//0.25;
+	basicAngularSpd = 0.05;//0.1;
+	slowLinearSpd = 0.05;//0.1;
+	slowDisThreshold = 0.15;	//slow down when dis less than this
+	disThreshold = 0.05;		//arrive when dis less than this
+	angThreshold = 0.15;		//arrive when ang less than this
+	angLimit = 0.5;			//fix dir when ang bigger than this
+	slowAngLimit = 0.3;		
 }
 
 void LocalPlanner::setRate(int pRate){
@@ -141,7 +141,7 @@ void LocalPlanner::pubVel(){
 						break;
 					}
 					biasAng = getBiasAng(robotPose.th,path[pathIdx].th);
-					spinDir = biasAng / fabs(biasAng);
+					spinDir = -biasAng / fabs(biasAng);
 					vel.linear.x = 0;
 					vel.linear.y = 0;
 					vel.angular.z = spinDir * tempAngSpd;
@@ -234,7 +234,7 @@ std::cout << "control goal:" << biasAng+robotPose.th << " robotPose:"<<robotPose
 						break;
 					}
 					biasAng = getBiasAng(robotPose.th,getAng(robotPose,path[pathIdx]));
-					spinDir = biasAng / fabs(biasAng);
+					spinDir = -biasAng / fabs(biasAng);
 					vel.linear.x = 0;
 					vel.linear.y = 0;
 					vel.angular.z = spinDir * tempAngSpd;
@@ -246,7 +246,7 @@ std::cout << "adjust:" << biasAng << std::endl;
 			else{
 				vel.linear.x = tempLinSpd;
 				vel.linear.y = 0;
-				vel.angular.z = spinDir *  tempAngSpd;
+				vel.angular.z = -spinDir *  tempAngSpd;
 				velPub.publish(vel);
 				wait.sleep();
 //std::cout <<"normal" << std::endl;
