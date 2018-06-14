@@ -30,7 +30,7 @@ void PoseHandler::onRecSlamPose(const geometry_msgs::PoseStamped::ConstPtr& msg)
 	if(robotPose.header.frame_id == "empty"){
 		return;
 	}
-	else{
+	else{/*
 		if(lastPose.header.frame_id != "empty"){
 			double dx = abs(robotPose.pose.position.x-lastPose.pose.position.x);
 			double dy = abs(robotPose.pose.position.y-lastPose.pose.position.y);
@@ -42,12 +42,12 @@ void PoseHandler::onRecSlamPose(const geometry_msgs::PoseStamped::ConstPtr& msg)
 				geometry_msgs::PoseWithCovarianceStamped resetPoseMsg;
 				resetPoseMsg.header.frame_id = "map";
 				resetPoseMsg.pose.pose = lastPose.pose;
-			//	resetPosePub.publish(resetPoseMsg);
-			//	resetCmdPub.publish(resetMsg);
+				resetPosePub.publish(resetPoseMsg);
+				resetCmdPub.publish(resetMsg);
 				robotPose = lastPose;
 				return;
 			}
-		}
+		}*/
 		cout << msg->pose.position.x << "," << msg->pose.position.y << "," << tf::getYaw(msg->pose.orientation) << endl;
 	robotPosePub.publish(robotPose);
 	}

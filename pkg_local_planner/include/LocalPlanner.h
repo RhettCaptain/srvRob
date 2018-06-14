@@ -64,6 +64,8 @@ private:
 	double getDis(const Pose& p1,const Pose& p2);
 	double getAng(const Pose& p1,const Pose& p2);
 	double getBiasAng(const double robotAng,const double goalAng);
+
+	void printState(const char* state,double linSpd,double angSpd);
 };
 
 #endif

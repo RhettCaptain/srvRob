@@ -14,7 +14,7 @@ private:
 	int leftHallCount,rightHallCount;
 	ros::Time pubTime;
 	
-	enum MotorDir{FF=0x11,FB=0x10,BF=0x01,BB=0x00}motorDir;
+	enum MotorDir{FF=0x10,FB=0x11,BF=0x00,BB=0x01}motorDir;
 	void crc16Modbus(uchar *p, int len,uchar* hCrc,uchar* lCrc);
 	void openMotor(const char* motorPort,int baud=115200,int dataBits=8,int stopBits=1,char parity='n');
 	void closeMotor();

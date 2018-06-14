@@ -1,5 +1,5 @@
 #include "LocalPlanner.h"
-
+ 
 LocalPlanner::LocalPlanner(){
 	pathSub = nHandle.subscribe("topic_global_path",10,&LocalPlanner::onRecPath,this);
 	obsSub = nHandle.subscribe("topic_obstacle",10,&LocalPlanner::onRecObs,this);
@@ -118,10 +118,9 @@ void LocalPlanner::pubVel(){
 			vel.angular.z = 0;
 			velPub.publish(vel);
 			wait.sleep();
-//std::cout << "Pause or fin" << std::endl;
+printState("Pause or fin",0,0);
 		}
 		else if(path.size() > 0 && getDis(robotPose,path[pathIdx]) <= disThreshold){
-//std::cout << "in goal" << std::endl;
 			//next goal and task finish rule
 			if(pathIdx == path.size()-1){
 				//task finish
@@ -141,13 +140,13 @@ void LocalPlanner::pubVel(){
 						break;
 					}
 					biasAng = getBiasAng(robotPose.th,path[pathIdx].th);
-					spinDir = -biasAng / fabs(biasAng);
+					spinDir = biasAng / fabs(biasAng);
 					vel.linear.x = 0;
 					vel.linear.y = 0;
 					vel.angular.z = spinDir * tempAngSpd;
 					velPub.publish(vel);
 					wait.sleep();
-std::cout << "finishing " << biasAng << "," << robotPose.th << std::endl;
+printState("in the last goal dis and adjusting ang",0,vel.angular.z);
 				}
 				vel.linear.x = 0;
 				vel.linear.y = 0;
@@ -157,15 +156,16 @@ std::cout << "finishing " << biasAng << "," << robotPose.th << std::endl;
 				path.clear();
 				pathIdx = 0;
 				taskFin = true;
+printState("arrive the last goal",0,0);
 			}
 			else{
 				//next goal
 				pathIdx++;
+printState("arrive a temp goal",0,0);
 			}
 			
 		}
 		else if(obsExist){
-//std::cout << "obstacle" << std::endl;
 			//avoid obstacle strategy
 			while(ros::ok() && obsExist){
 				ros::spinOnce();
@@ -185,6 +185,7 @@ std::cout << "finishing " << biasAng << "," << robotPose.th << std::endl;
 				vel.angular.z = tempAngSpd;
 				velPub.publish(vel);
 				wait.sleep();
+printState("meet obstacle and adjusting",0,vel.angular.z);
 			}
 			int keepTimes = 20;
 			for(int i=0;i<keepTimes;i++){
@@ -212,13 +213,19 @@ std::cout << "finishing " << biasAng << "," << robotPose.th << std::endl;
 				vel.angular.z = 0;
 				velPub.publish(vel);
 				wait.sleep();
+printState("remove obstacle",tempLinSpd,0);
 			}
 		}
 		else{
 			//control strategy	
-			double biasAng = getBiasAng(robotPose.th,getAng(robotPose,path[pathIdx]));
+			double biasAng;
+			if(getDis(robotPose,path[pathIdx])>slowDisThreshold){
+				biasAng = getBiasAng(robotPose.th,getAng(robotPose,path[pathIdx]));
+			}else{
+				biasAng = getBiasAng(robotPose.th,path[pathIdx].th);
+			}
+			
 			int spinDir = biasAng / fabs(biasAng);
-std::cout << "control goal:" << biasAng+robotPose.th << " robotPose:"<<robotPose.th << " biasAng:" << biasAng  << std::endl;
 			if(fabs(biasAng) > angLimit){
 				while(ros::ok() && fabs(biasAng) > angThreshold){
 					ros::spinOnce();
@@ -234,13 +241,13 @@ std::cout << "control goal:" << biasAng+robotPose.th << " robotPose:"<<robotPose
 						break;
 					}
 					biasAng = getBiasAng(robotPose.th,getAng(robotPose,path[pathIdx]));
-					spinDir = -biasAng / fabs(biasAng);
+					spinDir = biasAng / fabs(biasAng);
 					vel.linear.x = 0;
 					vel.linear.y = 0;
 					vel.angular.z = spinDir * tempAngSpd;
 					velPub.publish(vel);
-std::cout << "adjust:" << biasAng << std::endl;
 					wait.sleep();
+printState("normal area adjusting ang",0,vel.angular.z);
 				}
 			}
 			else{
@@ -249,7 +256,7 @@ std::cout << "adjust:" << biasAng << std::endl;
 				vel.angular.z = -spinDir *  tempAngSpd;
 				velPub.publish(vel);
 				wait.sleep();
-//std::cout <<"normal" << std::endl;
+printState("normal area moving",tempLinSpd,vel.angular.z);
 			}
 		}
 
@@ -288,4 +295,14 @@ double LocalPlanner::getBiasAng(const double robotAng,const double goalAng){
 		bias += 2*M_PI;
 	}
 	return bias;
+}
+
+void LocalPlanner::printState(const char* state,double linSpd,double angSpd){
+	std::cout << "--------------" << std::endl;
+	std::cout << "state: " << state << std::endl;
+	std::cout << "dis to goal: " << getDis(robotPose,path[pathIdx]) << std::endl;
+	std::cout << "biasAng to goal: " << getBiasAng(robotPose.th,path[pathIdx].th) << std::endl;
+	std::cout << "biasAng to linkLine: "<< getBiasAng(robotPose.th,getAng(robotPose,path[pathIdx])) << std::endl;
+	std::cout << "linSpd: " << linSpd << ";angSpd: " << angSpd << std::endl;
+	std::cout << "xxxxxxxxxxxxxxxx" << std::endl;
 }

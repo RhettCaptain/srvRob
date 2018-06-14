@@ -113,7 +113,7 @@ void WeiNuoController::move(int leftRotateSpd,int rightRotateSpd){
 	rightRotateSpd = abs(rightRotateSpd);
 	vector<uchar> moveCmd(9);
 	moveCmd[0] = 0x1b;
-	moveCmd[1] = motorDir^0x10;
+	moveCmd[1] = motorDir;
 	moveCmd[2] = (uchar)(leftRotateSpd>>8);
 	moveCmd[3] = (uchar)(leftRotateSpd & 0x00ff);
 	moveCmd[4] = (uchar)(rightRotateSpd>>8);
