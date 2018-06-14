@@ -20,7 +20,7 @@ LocalPlanner::LocalPlanner(){
 	slowLinearSpd = 0.05;//0.1;
 	slowDisThreshold = 0.15;	//slow down when dis less than this
 	disThreshold = 0.05;		//arrive when dis less than this
-	angThreshold = 0.15;		//arrive when ang less than this
+	angThreshold = 0.2;		//arrive when ang less than this
 	angLimit = 0.5;			//fix dir when ang bigger than this
 	slowAngLimit = 0.3;		
 }
@@ -253,7 +253,7 @@ printState("normal area adjusting ang",0,vel.angular.z);
 			else{
 				vel.linear.x = tempLinSpd;
 				vel.linear.y = 0;
-				vel.angular.z = -spinDir *  tempAngSpd;
+				vel.angular.z = spinDir *  tempAngSpd;
 				velPub.publish(vel);
 				wait.sleep();
 printState("normal area moving",tempLinSpd,vel.angular.z);
@@ -300,6 +300,11 @@ double LocalPlanner::getBiasAng(const double robotAng,const double goalAng){
 void LocalPlanner::printState(const char* state,double linSpd,double angSpd){
 	std::cout << "--------------" << std::endl;
 	std::cout << "state: " << state << std::endl;
+	if(path.size()==0){
+		std::cout << "no path received" << std::endl;
+		std::cout << "xxxxxxxxxxxxxxxx" << std::endl;
+		return;	
+	}
 	std::cout << "dis to goal: " << getDis(robotPose,path[pathIdx]) << std::endl;
 	std::cout << "biasAng to goal: " << getBiasAng(robotPose.th,path[pathIdx].th) << std::endl;
 	std::cout << "biasAng to linkLine: "<< getBiasAng(robotPose.th,getAng(robotPose,path[pathIdx])) << std::endl;
