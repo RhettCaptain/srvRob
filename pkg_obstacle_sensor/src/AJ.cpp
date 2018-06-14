@@ -25,8 +25,8 @@ void AJ::start(int pBaud,int pDataBits,int pStopBits,char pParity){
 	port->openPort();
 	port->setPort(pBaud,pDataBits,pStopBits,pParity);
 	port->setBlock(true);
-//	port->setInMode('r');
-//	port->setOutMode('r');	
+	port->setInMode('r');
+	port->setOutMode('r');	
 	analyse();	
 }
 
