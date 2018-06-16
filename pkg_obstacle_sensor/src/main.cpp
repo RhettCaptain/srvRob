@@ -36,7 +36,7 @@ int main(int argc,char** argv){
 
 	pthread_t tid;
 	int err;
-	err = pthread_create(&tid,NULL,createAJ,(void*)"0");
+	err = pthread_create(&tid,NULL,createAJ,(void*)"1");
 //	err = pthread_create(&tid,NULL,createAJ,(void*)"1");
 //	err = pthread_create(&tid,NULL,createAJ,(void*)"2");
 

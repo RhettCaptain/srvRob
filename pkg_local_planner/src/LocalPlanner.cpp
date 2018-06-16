@@ -16,7 +16,7 @@ LocalPlanner::LocalPlanner(){
 	pathIdx = 0;	
 
 	basicLinearSpd = 0.05;//0.25;
-	basicAngularSpd = 0.05;//0.1;
+	basicAngularSpd = 0.02;//0.1;
 	slowLinearSpd = 0.05;//0.1;
 	slowDisThreshold = 0.15;	//slow down when dis less than this
 	disThreshold = 0.05;		//arrive when dis less than this
@@ -222,7 +222,8 @@ printState("remove obstacle",tempLinSpd,0);
 			if(getDis(robotPose,path[pathIdx])>slowDisThreshold){
 				biasAng = getBiasAng(robotPose.th,getAng(robotPose,path[pathIdx]));
 			}else{
-				biasAng = getBiasAng(robotPose.th,path[pathIdx].th);
+			//	biasAng = getBiasAng(robotPose.th,path[pathIdx].th);
+				biasAng = 0.01;
 			}
 			
 			int spinDir = biasAng / fabs(biasAng);
@@ -240,8 +241,14 @@ printState("remove obstacle",tempLinSpd,0);
 					if(taskFin){
 						break;
 					}
-					biasAng = getBiasAng(robotPose.th,getAng(robotPose,path[pathIdx]));
+					if(getDis(robotPose,path[pathIdx])>slowDisThreshold){
+						biasAng = getBiasAng(robotPose.th,getAng(robotPose,path[pathIdx]));
+					}else{
+				//		biasAng = getBiasAng(robotPose.th,path[pathIdx].th);
+						biasAng = 0.01;
+					}
 					spinDir = biasAng / fabs(biasAng);
+				//	spinDir = 1;
 					vel.linear.x = 0;
 					vel.linear.y = 0;
 					vel.angular.z = spinDir * tempAngSpd;
