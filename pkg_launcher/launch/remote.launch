@@ -6,7 +6,11 @@
 	<node pkg="tf" type="static_transform_publisher" name="base_link2laser_tf" args="-0.0 0 0 0 0 0 base_link laser_frame 50" />
 	<node pkg="rplidar_ros" type="rplidarNode" name="node_laser"/>
 	<node pkg="pkg_pose" type="node_init_pose" name="node_init_pose"/> 
-	<node pkg="hector_mapping" type="hector_mapping" name="node_slam" output="screen" />
+	<node pkg="hector_mapping" type="hector_mapping" name="node_slam" output="screen" >
+		<param name="map_update_distance_thresh" value="0.2"/>
+		<param name="map_update_angle_thresh" value="0.2"/>
+	</node>
+
 	<node pkg="laser_filter" type="node_laser_filter" name="node_laser_filter" />
 	<node pkg="pkg_web_handler" type="node_web_handler" name="node_web_handler" />
 	<node pkg="pkg_pose" type="node_pub_pose" name="node_pub_pose" />

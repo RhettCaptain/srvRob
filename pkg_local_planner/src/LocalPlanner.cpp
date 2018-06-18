@@ -16,7 +16,7 @@ LocalPlanner::LocalPlanner(){
 	pathIdx = 0;	
 
 	basicLinearSpd = 0.05;//0.25;
-	basicAngularSpd = 0.02;//0.1;
+	basicAngularSpd = 0.005;//0.1;
 	slowLinearSpd = 0.05;//0.1;
 	slowDisThreshold = 0.15;	//slow down when dis less than this
 	disThreshold = 0.05;		//arrive when dis less than this
