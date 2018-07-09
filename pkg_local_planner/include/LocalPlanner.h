@@ -45,6 +45,8 @@ private:
 	double slowDisThreshold;	//slow down when in threshold
 	double disThreshold, angThreshold;	//stop when in threshold 
 	double angLimit,slowAngLimit;	//turn at situ when over angle limit
+	
+	int spinTimes,maxSpinTimes;	//when spin times arrive max,wait
  
 public:
 	LocalPlanner();
@@ -66,6 +68,7 @@ private:
 	double getBiasAng(const double robotAng,const double goalAng);
 
 	void printState(const char* state,double linSpd,double angSpd);
+	void robustSpin(int waitRate=1);
 };
 
 #endif

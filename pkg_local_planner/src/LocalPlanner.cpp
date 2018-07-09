@@ -23,6 +23,9 @@ LocalPlanner::LocalPlanner(){
 	angThreshold = 0.2;		//arrive when ang less than this
 	angLimit = 0.5;			//fix dir when ang bigger than this
 	slowAngLimit = 0.3;		
+
+	spinTimes = 0;
+	maxSpinTimes = 20;
 }
 
 void LocalPlanner::setRate(int pRate){
@@ -129,6 +132,7 @@ printState("Pause or fin",0,0);
 				while(ros::ok() && fabs(biasAng) > angThreshold){
 					ros::spinOnce();
 					if(isPause){
+						spinTimes = 0;
 						vel.linear.x = 0;
 						vel.linear.y = 0;
 						vel.angular.z = 0;
@@ -141,6 +145,7 @@ printState("Pause or fin",0,0);
 					}
 					biasAng = getBiasAng(robotPose.th,path[pathIdx].th);
 					spinDir = biasAng / fabs(biasAng);
+					robustSpin();
 					vel.linear.x = 0;
 					vel.linear.y = 0;
 					vel.angular.z = spinDir * tempAngSpd;
@@ -148,6 +153,7 @@ printState("Pause or fin",0,0);
 					wait.sleep();
 printState("in the last goal dis and adjusting ang",0,vel.angular.z);
 				}
+				spinTimes = 0;
 				vel.linear.x = 0;
 				vel.linear.y = 0;
 				vel.angular.z = 0;
@@ -170,6 +176,7 @@ printState("arrive a temp goal",0,0);
 			while(ros::ok() && obsExist){
 				ros::spinOnce();
 				if(isPause){
+					spinTimes = 0;
 					vel.linear.x = 0;
 					vel.linear.y = 0;
 					vel.angular.z = 0;
@@ -180,6 +187,7 @@ printState("arrive a temp goal",0,0);
 				if(taskFin){
 					break;
 				}
+				robustSpin();
 				vel.linear.x = 0;
 				vel.linear.y = 0;
 				vel.angular.z = tempAngSpd;
@@ -191,6 +199,7 @@ printState("meet obstacle and adjusting",0,vel.angular.z);
 			for(int i=0;i<keepTimes;i++){
 				ros::spinOnce();
 				if(isPause){
+					spinTimes = 0;
 					vel.linear.x = 0;
 					vel.linear.y = 0;
 					vel.angular.z = 0;
@@ -202,12 +211,14 @@ printState("meet obstacle and adjusting",0,vel.angular.z);
 					break;
 				}
 				if(obsExist){
+					robustSpin();
 					vel.linear.x = 0;
 					vel.linear.y = 0;
 					vel.angular.z = tempAngSpd;
 					velPub.publish(vel);
 					break;
 				}
+				spinTimes = 0;
 				vel.linear.x = tempLinSpd;
 				vel.linear.y = 0;
 				vel.angular.z = 0;
@@ -231,6 +242,7 @@ printState("remove obstacle",tempLinSpd,0);
 				while(ros::ok() && fabs(biasAng) > angThreshold){
 					ros::spinOnce();
 					if(isPause){
+						spinTimes = 0;
 						vel.linear.x = 0;
 						vel.linear.y = 0;
 						vel.angular.z = 0;
@@ -249,6 +261,7 @@ printState("remove obstacle",tempLinSpd,0);
 					}
 					spinDir = biasAng / fabs(biasAng);
 				//	spinDir = 1;
+					robustSpin();
 					vel.linear.x = 0;
 					vel.linear.y = 0;
 					vel.angular.z = spinDir * tempAngSpd;
@@ -258,9 +271,10 @@ printState("normal area adjusting ang",0,vel.angular.z);
 				}
 			}
 			else{
+				spinTimes = 0;
 				vel.linear.x = tempLinSpd;
 				vel.linear.y = 0;
-				vel.angular.z = spinDir *  tempAngSpd;
+				vel.angular.z = spinDir *  tempAngSpd * 10;
 				velPub.publish(vel);
 				wait.sleep();
 printState("normal area moving",tempLinSpd,vel.angular.z);
@@ -317,4 +331,13 @@ void LocalPlanner::printState(const char* state,double linSpd,double angSpd){
 	std::cout << "biasAng to linkLine: "<< getBiasAng(robotPose.th,getAng(robotPose,path[pathIdx])) << std::endl;
 	std::cout << "linSpd: " << linSpd << ";angSpd: " << angSpd << std::endl;
 	std::cout << "xxxxxxxxxxxxxxxx" << std::endl;
+}
+
+void LocalPlanner::robustSpin(int waitRate){
+	ros::Rate wait(waitRate);
+	spinTimes++;
+	if(spinTimes >= maxSpinTimes){
+		wait.sleep();
+		spinTimes = 0;
+	}
 }

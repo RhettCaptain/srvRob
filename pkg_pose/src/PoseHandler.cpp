@@ -7,6 +7,7 @@ PoseHandler::PoseHandler(){
 	robotPosePub = nh.advertise<geometry_msgs::PoseStamped>("topic_robot_pose",10);
 	resetPosePub = nh.advertise<geometry_msgs::PoseWithCovarianceStamped>("initialpose",10);
 	resetCmdPub = nh.advertise<std_msgs::String>("syscommand",1);
+	motionCmdPub = nh.advertise<std_msgs::String>("topic_motion_cmd",2);	
 
 	robotPose.header.frame_id = "empty";
 	robotPose.pose.position.x = 0;
@@ -14,9 +15,9 @@ PoseHandler::PoseHandler(){
 	robotPose.pose.position.z = 0;
 	robotPose.pose.orientation = tf::createQuaternionMsgFromYaw(0);
 	
-	xErrLimit = 0.5;
-	yErrLimit = 0.5;
-	thErrLimit = 1;
+	xErrLimit = 0.3;
+	yErrLimit = 0.3;
+	thErrLimit = 0.3;
 }
 
 void PoseHandler::start(){
@@ -38,13 +39,21 @@ void PoseHandler::onRecSlamPose(const geometry_msgs::PoseStamped::ConstPtr& msg)
 			if(dx>xErrLimit || dy>yErrLimit || dth>thErrLimit){
 				std_msgs::String resetMsg;
 				resetMsg.data = "reset";
-	
 				geometry_msgs::PoseWithCovarianceStamped resetPoseMsg;
 				resetPoseMsg.header.frame_id = "map";
 				resetPoseMsg.pose.pose = lastPose.pose;
 				resetPosePub.publish(resetPoseMsg);
 				resetCmdPub.publish(resetMsg);
 				robotPose = lastPose;
+				std_msgs::String motionMsg;
+				motionMsg.data = "pause";
+				motionCmdPub.publish(motionMsg);
+				ros::Rate wait(1);
+				wait.sleep();
+				wait.sleep();
+				wait.sleep();
+				motionMsg.data = "go on";
+				motionCmdPub.publish(motionMsg);
 				return;
 			}
 		}*/

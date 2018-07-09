@@ -14,6 +14,7 @@ private:
 	ros::Publisher robotPosePub;
 	ros::Publisher resetPosePub;
 	ros::Publisher resetCmdPub;
+	ros::Publisher motionCmdPub;
 	geometry_msgs::PoseStamped robotPose;
 	double xErrLimit;
 	double yErrLimit;
