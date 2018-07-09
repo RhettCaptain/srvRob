@@ -137,7 +137,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-  add_executable(node_base_controller src/BaseController.cpp src/WeiNuoController.cpp ${COMMON_PATH}/SerialPort/src/SerialPort.cpp src/main.cpp)
+  add_executable(node_base_controller src/BaseController.cpp src/GaoJi.cpp ${COMMON_PATH}/SerialPort/src/SerialPort.cpp src/main.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
