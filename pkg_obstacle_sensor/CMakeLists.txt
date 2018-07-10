@@ -137,6 +137,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
+ add_executable(node_aj src/ajFactory.cpp src/AJ.cpp ${COMMON_PATH}/SerialPort/src/SerialPort.cpp)
  add_executable(node_obstacle_sensor src/main.cpp src/AJ.cpp ${COMMON_PATH}/SerialPort/src/SerialPort.cpp)
 
 ## Rename C++ executable without prefix
@@ -151,6 +152,9 @@ include_directories(
 
 ## Specify libraries to link a library or executable target against
  target_link_libraries(node_obstacle_sensor
+   ${catkin_LIBRARIES}
+ )
+ target_link_libraries(node_aj
    ${catkin_LIBRARIES}
  )
 

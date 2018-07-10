@@ -1,8 +1,34 @@
 #include "AJ.h"
-#include <pthread.h>
 #include <string>
 #include "std_msgs/Bool.h"
 
+int dis;
+
+void onRecAJ(const std_msgs::Int16::ConstPtr& msg){
+	dis = msg->data;	
+}
+
+int main(int argc,char** argv){
+	ros::init(argc,argv,"node_obstacle_sensor");
+	ros::NodeHandle nHandle;
+	ros::Subscriber sub = nHandle.subscribe("topic_aj1",100,onRecAJ);
+	dis=65535;
+	ros::Publisher pub = nHandle.advertise<std_msgs::Bool>("topic_obstacle",10);
+
+	int obsThr = 700;	//mm
+	
+	while(ros::ok()){
+		ros::spinOnce();
+		std_msgs::Bool obsExist;
+		obsExist.data = false;
+		if(dis < obsThr){
+			obsExist.data = true;	
+		} 
+		pub.publish(obsExist);
+	}
+}
+
+/* thread may have problem
 void* createAJ(void* idx){
 	std::string suffix = (char*)idx;
 	std::string addr="/dev/ttyUSB"+suffix;
@@ -37,8 +63,8 @@ int main(int argc,char** argv){
 	pthread_t tid;
 	int err;
 	err = pthread_create(&tid,NULL,createAJ,(void*)"0");
-//	err = pthread_create(&tid,NULL,createAJ,(void*)"1");
-//	err = pthread_create(&tid,NULL,createAJ,(void*)"2");
+	err = pthread_create(&tid,NULL,createAJ,(void*)"1");
+	err = pthread_create(&tid,NULL,createAJ,(void*)"2");
 
 	int obsThr = 700;	//mm
 	
@@ -56,3 +82,4 @@ int main(int argc,char** argv){
 	
 	
 }
+*/

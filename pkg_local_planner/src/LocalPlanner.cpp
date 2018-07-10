@@ -15,9 +15,9 @@ LocalPlanner::LocalPlanner(){
 	isPause = false;
 	pathIdx = 0;	
 
-	basicLinearSpd = 0.05;//0.25;
-	basicAngularSpd = 0.005;//0.1;
-	slowLinearSpd = 0.05;//0.1;
+	basicLinearSpd = 0.25;//0.25;
+	basicAngularSpd = 0.5;//0.1;
+	slowLinearSpd = 0.1;//0.1;
 	slowDisThreshold = 0.15;	//slow down when dis less than this
 	disThreshold = 0.05;		//arrive when dis less than this
 	angThreshold = 0.2;		//arrive when ang less than this
@@ -61,6 +61,15 @@ void LocalPlanner::onRecPath(const nav_msgs::Path::ConstPtr& msg){
 		Pose* tmp = new Pose(x,y,th);
 		path.push_back(*tmp);
 	}
+	//return path
+	for(int i=0;i<pCount-1;i++){
+		double x = msg->poses[pCount-i-2].pose.position.x;
+		double y = msg->poses[pCount-i-2].pose.position.y;
+		double th = tf::getYaw(msg->poses[pCount-i-2].pose.orientation);
+		Pose* tmp = new Pose(x,y,th);
+		path.push_back(*tmp);
+	}
+printf("///////////////%d/////////////////////\n",pCount);
 } 
 
 void LocalPlanner::onRecObs(const std_msgs::Bool::ConstPtr& msg){
@@ -125,7 +134,7 @@ printState("Pause or fin",0,0);
 		}
 		else if(path.size() > 0 && getDis(robotPose,path[pathIdx]) <= disThreshold){
 			//next goal and task finish rule
-			if(pathIdx == path.size()-1){
+			if(pathIdx == path.size()/2){
 				//task finish
 				double biasAng = getBiasAng(robotPose.th,path[pathIdx].th);
 				int spinDir = biasAng / fabs(biasAng);
@@ -159,6 +168,13 @@ printState("in the last goal dis and adjusting ang",0,vel.angular.z);
 				vel.angular.z = 0;
 				velPub.publish(vel);
 				wait.sleep();
+				pathIdx++;
+				usleep(5000*1000);
+			//	path.clear();
+			//	pathIdx = 0;
+			//	taskFin = true;
+printState("arrive the last second goal,waiting for taking meals",0,0);
+			}else if(pathIdx == path.size()-1){
 				path.clear();
 				pathIdx = 0;
 				taskFin = true;
@@ -195,7 +211,7 @@ printState("arrive a temp goal",0,0);
 				wait.sleep();
 printState("meet obstacle and adjusting",0,vel.angular.z);
 			}
-			int keepTimes = 20;
+			int keepTimes = 200;
 			for(int i=0;i<keepTimes;i++){
 				ros::spinOnce();
 				if(isPause){
@@ -274,7 +290,7 @@ printState("normal area adjusting ang",0,vel.angular.z);
 				spinTimes = 0;
 				vel.linear.x = tempLinSpd;
 				vel.linear.y = 0;
-				vel.angular.z = spinDir *  tempAngSpd * 10;
+				vel.angular.z = spinDir *  tempAngSpd * 0.05;
 				velPub.publish(vel);
 				wait.sleep();
 printState("normal area moving",tempLinSpd,vel.angular.z);

@@ -3,7 +3,7 @@
 	<node pkg="pkg_joystick" name="node_joystick" type="node_joystick"/> 
 	<node pkg="pkg_base_controller" name="node_base_controller" type="node_base_controller"/>
 	<node pkg="pkg_odometry" name="node_odometry" type="node_odometry" />
-	<node pkg="tf" type="static_transform_publisher" name="base_link2laser_tf" args="-0.0 0 0 0 0 0 base_link laser_frame 50" />
+	<node pkg="tf" type="static_transform_publisher" name="base_link2laser_tf" args="0 0 0 -1.7 0 0 base_link laser_frame 50" />
 	<node pkg="rplidar_ros" type="rplidarNode" name="node_laser"/>
 	<node pkg="pkg_pose" type="node_init_pose" name="node_init_pose"/> 
 	<node pkg="hector_mapping" type="hector_mapping" name="node_slam" output="screen" >
@@ -15,4 +15,6 @@
 	<node pkg="pkg_web_handler" type="node_web_handler" name="node_web_handler" />
 	<node pkg="pkg_pose" type="node_pub_pose" name="node_pub_pose" />
 	<node pkg="pkg_local_planner" type="node_local_planner" name="node_local_planner" output="screen"/> 
+	<node pkg="pkg_obstacle_sensor" type="node_aj" name="node_aj" /> 
+	<node pkg="pkg_obstacle_sensor" type="node_obstacle_sensor" name="node_obstacle_sensor" /> 
 </launch>
