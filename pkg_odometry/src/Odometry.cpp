@@ -62,6 +62,7 @@ void Odometry::broadcastTf(){
 	base2OdomTf.transform.translation.y = odometryPose.position.y;
 	base2OdomTf.transform.translation.z = odometryPose.position.z;
 	base2OdomTf.transform.rotation  = tf::createQuaternionMsgFromYaw(tf::getYaw(odometryPose.orientation));
+/*
 std::cout << base2OdomTf.transform.translation.x << std::endl;	
 std::cout << base2OdomTf.transform.translation.y << std::endl;	
 std::cout << base2OdomTf.transform.translation.z << std::endl;	
@@ -70,6 +71,7 @@ std::cout << base2OdomTf.transform.rotation.y << std::endl;
 std::cout << base2OdomTf.transform.rotation.z << std::endl;	
 std::cout << base2OdomTf.transform.rotation.w << std::endl;	
 std::cout << "-------------------------" << std::endl;	
+*/
 	tfBroadcaster.sendTransform(base2OdomTf);
 }
 

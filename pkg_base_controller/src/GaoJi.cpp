@@ -133,12 +133,9 @@ void GaoJi::move(int leftRotateSpd,int rightRotateSpd){
 	leftMove(leftRotateSpd);
 	rightMove(rightRotateSpd);
 
-std::cout << std::hex;
 //for(uchar c:moveCmd){
 //  std::cout <<(int)c << " " ;
 //}
-std::cout<< std::endl;
-std::dec;
 }
 
 
@@ -149,7 +146,7 @@ void GaoJi::pubFakeOdometerMsg(const geometry_msgs::Twist::ConstPtr& msg){
 	pubTime = newPubTime; 	//update the odometer msg publish time
 	double linDis = msg->linear.x * deltaTime;
 	double angDis = msg->angular.z * deltaTime;
-std::cout << "deltaTime: " << deltaTime << " angDis: " << msg->angular.z << std::endl;
+//std::cout << "deltaTime: " << deltaTime << " angDis: " << msg->angular.z << std::endl;
 	//get twist
 	//trust the expected twist
 		
