@@ -73,6 +73,14 @@ std::cout << base2OdomTf.transform.rotation.w << std::endl;
 std::cout << "-------------------------" << std::endl;	
 */
 	tfBroadcaster.sendTransform(base2OdomTf);
+	base2OdomTf.header.stamp = ros::Time::now();
+	base2OdomTf.header.frame_id = "base_link";
+	base2OdomTf.child_frame_id = "laser_frame";
+	base2OdomTf.transform.translation.x = 0;
+	base2OdomTf.transform.translation.y = 0;
+	base2OdomTf.transform.translation.z = 0;
+	base2OdomTf.transform.rotation  = tf::createQuaternionMsgFromYaw(0);
+	tfBroadcaster.sendTransform(base2OdomTf);
 }
 
 void Odometry::onRecOdometerMsg(const nav_msgs::Odometry::ConstPtr& msg){

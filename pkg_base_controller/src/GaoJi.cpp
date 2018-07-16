@@ -115,12 +115,12 @@ void GaoJi::move(int leftRotateSpd,int rightRotateSpd){
 	}
 	motorDir = newDir;	//update direction
 	
-	if(leftRotateSpd > 0){
+	if(leftRotateSpd < 0){
 		leftBack(false);
 	}else{
 		leftBack(true);
 	}
-	if(rightRotateSpd > 0){
+	if(rightRotateSpd < 0){
 		rightBack(false);
 	}else{
 		rightBack(true);

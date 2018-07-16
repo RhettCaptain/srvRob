@@ -25,7 +25,8 @@ bool loadInitPose(geometry_msgs::PoseWithCovarianceStamped& initPose,char* xmlPa
 void updateInitPose(const geometry_msgs::PoseStamped::ConstPtr& msg){
 	char* xmlPath = new char[100];
         strcpy(xmlPath,"/home/");
-        strcat(xmlPath, getlogin());
+     //   strcat(xmlPath, getlogin());
+        strcat(xmlPath, "canfu");
         strcat(xmlPath, "/srv_rob_conf/initPose.xml");
 	
 	XMLDocument doc;
@@ -55,7 +56,8 @@ int main(int argc,char** argv){
 	initPoseMsg.header.frame_id = "map";
 	char* xmlPath = new char[100];
 	strcpy(xmlPath,"/home/");
-	strcat(xmlPath, getlogin());
+//	strcat(xmlPath, getlogin());
+        strcat(xmlPath, "canfu");
 	strcat(xmlPath, "/srv_rob_conf/initPose.xml");
 	while(ros::ok() && !loadInitPose(initPoseMsg,xmlPath)){
 		ROS_INFO("LOAD FAIL");

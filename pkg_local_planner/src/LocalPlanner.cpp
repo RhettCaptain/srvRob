@@ -15,10 +15,10 @@ LocalPlanner::LocalPlanner(){
 	isPause = false;
 	pathIdx = 0;	
 
-	basicLinearSpd = 0.25;//0.25;
-	basicAngularSpd = 0.5;//0.1;
-	slowLinearSpd = 0.1;//0.1;
-	slowDisThreshold = 0.15;	//slow down when dis less than this
+	basicLinearSpd = 0.05;//0.25;
+	basicAngularSpd = 0.16;//0.1;
+	slowLinearSpd = 0.02;//0.1;
+	slowDisThreshold = 0.1;	//slow down when dis less than this
 	disThreshold = 0.05;		//arrive when dis less than this
 	angThreshold = 0.2;		//arrive when ang less than this
 	angLimit = 0.5;			//fix dir when ang bigger than this
@@ -69,7 +69,6 @@ void LocalPlanner::onRecPath(const nav_msgs::Path::ConstPtr& msg){
 		Pose* tmp = new Pose(x,y,th);
 		path.push_back(*tmp);
 	}
-printf("///////////////%d/////////////////////\n",pCount);
 } 
 
 void LocalPlanner::onRecObs(const std_msgs::Bool::ConstPtr& msg){
@@ -85,7 +84,6 @@ void LocalPlanner::onRecCmd(const std_msgs::String::ConstPtr& msg){
 	}
 	else if(msg->data == "stop"){
 		taskFin = true;
-std::cout << "########################################" << std::endl;
 		path.clear();
 		pathIdx = 0;
 	}
@@ -130,7 +128,7 @@ void LocalPlanner::pubVel(){
 			vel.angular.z = 0;
 			velPub.publish(vel);
 			wait.sleep();
-printState("Pause or fin",0,0);
+//printState("Pause or fin",0,0);
 		}
 		else if(path.size() > 0 && getDis(robotPose,path[pathIdx]) <= disThreshold){
 			//next goal and task finish rule
@@ -154,14 +152,17 @@ printState("Pause or fin",0,0);
 					}
 					biasAng = getBiasAng(robotPose.th,path[pathIdx].th);
 					spinDir = biasAng / fabs(biasAng);
-					robustSpin();
-					vel.linear.x = 0;
-					vel.linear.y = 0;
-					vel.angular.z = spinDir * tempAngSpd;
-					velPub.publish(vel);
-					wait.sleep();
-printState("in the last goal dis and adjusting ang",0,vel.angular.z);
+				//	robustSpin();
+					if(fabs(biasAng) > angThreshold){
+						vel.linear.x = 0;
+						vel.linear.y = 0;
+						vel.angular.z = spinDir * tempAngSpd;
+						velPub.publish(vel);
+						wait.sleep();
+					}
+//printState("in the last goal dis and adjusting ang",0,vel.angular.z);
 				}
+//printState("in thr",0,0);
 				spinTimes = 0;
 				vel.linear.x = 0;
 				vel.linear.y = 0;
@@ -173,17 +174,17 @@ printState("in the last goal dis and adjusting ang",0,vel.angular.z);
 			//	path.clear();
 			//	pathIdx = 0;
 			//	taskFin = true;
-printState("arrive the last second goal,waiting for taking meals",0,0);
+//printState("arrive the last second goal,waiting for taking meals",0,0);
 			}else if(pathIdx == path.size()-1){
 				path.clear();
 				pathIdx = 0;
 				taskFin = true;
-printState("arrive the last goal",0,0);
+//printState("arrive the last goal",0,0);
 			}
 			else{
 				//next goal
 				pathIdx++;
-printState("arrive a temp goal",0,0);
+//printState("arrive a temp goal",0,0);
 			}
 			
 		}
@@ -209,7 +210,7 @@ printState("arrive a temp goal",0,0);
 				vel.angular.z = tempAngSpd;
 				velPub.publish(vel);
 				wait.sleep();
-printState("meet obstacle and adjusting",0,vel.angular.z);
+//printState("meet obstacle and adjusting",0,vel.angular.z);
 			}
 			int keepTimes = 200;
 			for(int i=0;i<keepTimes;i++){
@@ -240,7 +241,7 @@ printState("meet obstacle and adjusting",0,vel.angular.z);
 				vel.angular.z = 0;
 				velPub.publish(vel);
 				wait.sleep();
-printState("remove obstacle",tempLinSpd,0);
+//printState("remove obstacle",tempLinSpd,0);
 			}
 		}
 		else{
@@ -277,23 +278,25 @@ printState("remove obstacle",tempLinSpd,0);
 					}
 					spinDir = biasAng / fabs(biasAng);
 				//	spinDir = 1;
-					robustSpin();
-					vel.linear.x = 0;
-					vel.linear.y = 0;
-					vel.angular.z = spinDir * tempAngSpd;
-					velPub.publish(vel);
-					wait.sleep();
-printState("normal area adjusting ang",0,vel.angular.z);
+				//	robustSpin();
+					if(fabs(biasAng) > angThreshold){
+						vel.linear.x = 0;
+						vel.linear.y = 0;
+						vel.angular.z = spinDir * tempAngSpd;
+						velPub.publish(vel);
+						wait.sleep();
+					}
+//printState("normal area adjusting ang",0,vel.angular.z);
 				}
 			}
 			else{
 				spinTimes = 0;
 				vel.linear.x = tempLinSpd;
 				vel.linear.y = 0;
-				vel.angular.z = spinDir *  tempAngSpd * 0.05;
+				vel.angular.z = spinDir *  tempAngSpd * 0;
 				velPub.publish(vel);
 				wait.sleep();
-printState("normal area moving",tempLinSpd,vel.angular.z);
+//printState("normal area moving",tempLinSpd,vel.angular.z);
 			}
 		}
 

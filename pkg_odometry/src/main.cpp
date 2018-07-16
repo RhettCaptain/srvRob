@@ -21,7 +21,8 @@ int main(int argc,char** argv){
 	//loadl initpose
 	char* xmlPath = new char[100];
         strcpy(xmlPath,"/home/");
-        strcat(xmlPath, getlogin());
+      //  strcat(xmlPath, getlogin());
+        strcat(xmlPath, "canfu");
         strcat(xmlPath, "/srv_rob_conf/initPose.xml");
 	double x,y,th;
         while(ros::ok() && !loadInitPose(&x,&y,&th,xmlPath)){

@@ -170,6 +170,8 @@ void Joystick::sendCmdVel(){
 		msgCmdVel.angular.z=-angSpd[speed];
 		break;
 	case STOP:
+		msgCmdVel.linear.x=0;
+		msgCmdVel.angular.z=0;
 		break;
 	default:
 		break;

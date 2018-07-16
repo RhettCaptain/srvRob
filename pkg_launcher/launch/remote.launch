@@ -3,12 +3,12 @@
 	<node pkg="pkg_joystick" name="node_joystick" type="node_joystick"/> 
 	<node pkg="pkg_base_controller" name="node_base_controller" type="node_base_controller"/>
 	<node pkg="pkg_odometry" name="node_odometry" type="node_odometry" />
-	<node pkg="tf" type="static_transform_publisher" name="base_link2laser_tf" args="0 0 0 0 0 0 base_link laser_frame 50" />
+<!--	<node pkg="tf" type="static_transform_publisher" name="base_link2laser_tf" args="0 0 0 0 0 0 base_link laser_frame 50" /> -->
 	<node pkg="rplidar_ros" type="rplidarNode" name="node_laser"/>
 	<node pkg="pkg_pose" type="node_init_pose" name="node_init_pose"/> 
 	<node pkg="hector_mapping" type="hector_mapping" name="node_slam" output="screen" >
-		<param name="map_update_distance_thresh" value="0.2"/>
-		<param name="map_update_angle_thresh" value="1.7"/>
+	<!--	<param name="map_update_distance_thresh" value="0.2"/> -->
+	<!--	<param name="map_update_angle_thresh" value="1.7"/> -->
 	</node>
 
 	<node pkg="laser_filter" type="node_laser_filter" name="node_laser_filter" />
