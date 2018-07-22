@@ -15,7 +15,7 @@ int main(int argc,char** argv){
 	dis=65535;
 	ros::Publisher pub = nHandle.advertise<std_msgs::Bool>("topic_obstacle",10);
 
-	int obsThr = 700;	//mm
+	int obsThr = 500;	//mm
 	
 	while(ros::ok()){
 		ros::spinOnce();
